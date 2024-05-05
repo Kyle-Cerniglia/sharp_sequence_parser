@@ -54,7 +54,7 @@ def extra_target():
         fileout.write("        GUIDING DITHER EVERY 3 FRAMES\n")
     frame_duration = input("Enter number of hours to capture data\n")
     if band_type == 'b':
-        frame_qty = (float(frame_duration) * 3600) / ((12 * 30 + 30)/12.0)
+        frame_qty = (float(frame_duration) * 3600) / 34.6
         frame_qty = math.floor(frame_qty)
     else:#Assuming narrowband
         frame_qty = (float(frame_duration) * 3600) / ((3 * 300 + 30)/3.0)
