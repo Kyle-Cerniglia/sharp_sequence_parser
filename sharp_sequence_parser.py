@@ -30,6 +30,7 @@ def extra_target():
     dec_m = input("Enter J2000 coordinates (DEC m)\n")
     dec_s = input("Enter J2000 coordinates (DEC s)\n")
     fileout.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + dec_d + " " + dec_m + " " + dec_s + "\"\n")
+    fileout.write("    DELAY 10\n")
 
     #Set target name
     target_name = input("Enter target name\n")
@@ -122,6 +123,7 @@ dec_d = input("Enter J2000 coordinates (DEC d)\n")
 dec_m = input("Enter J2000 coordinates (DEC m)\n")
 dec_s = input("Enter J2000 coordinates (DEC s)\n")
 fileout.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + dec_d + " " + dec_m + " " + dec_s + "\"\n")
+fileout.write("    DELAY 10\n")
 
 #Set target name
 target_name = input("Enter target name\n")
