@@ -38,7 +38,7 @@ def extra_target():
 
     #Platesolve and correct position
     fileout.write("    PRESERVE CAMERA SETTINGS\n")
-    fileout.write("        SET EXPOSURE TO 2\n")
+    fileout.write("        SET EXPOSURE TO 4\n")
     fileout.write("        SET GAIN TO 100\n")
     fileout.write("        MOUNT SOLVEANDSYNC\n")
     fileout.write("    END PRESERVE\n")
@@ -131,7 +131,7 @@ fileout.write("    TARGETNAME \"" + target_name + "\"\n")
 
 #Platesolve and correct position
 fileout.write("    PRESERVE CAMERA SETTINGS\n")
-fileout.write("        SET EXPOSURE TO 2\n")
+fileout.write("        SET EXPOSURE TO 4\n")
 fileout.write("        SET GAIN TO 100\n")
 fileout.write("        MOUNT SOLVEANDSYNC\n")
 fileout.write("    END PRESERVE\n")
