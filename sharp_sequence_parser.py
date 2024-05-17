@@ -58,7 +58,7 @@ def extra_target():
         frame_qty = (float(frame_duration) * 3600) / 34.6
         frame_qty = math.floor(frame_qty)
     else:#Assuming narrowband
-        frame_qty = (float(frame_duration) * 3600) / ((3 * 300 + 30)/3.0)
+        frame_qty = (float(frame_duration) * 3600) / 307.6
         frame_qty = math.floor(frame_qty)
     frame_qty = str(frame_qty)
     fileout.write("        CAPTURE " + frame_qty + " FRAMES REQUIREGUIDING True\n")
@@ -148,10 +148,10 @@ else:#Assuming narrowband
     fileout.write("        GUIDING DITHER EVERY 3 FRAMES\n")
 frame_duration = input("Enter number of hours to capture data\n")
 if band_type == 'b':
-    frame_qty = (float(frame_duration) * 3600) / ((12 * 30 + 30)/12.0)
+    frame_qty = (float(frame_duration) * 3600) / 34.6
     frame_qty = math.floor(frame_qty)
 else:#Assuming narrowband
-    frame_qty = (float(frame_duration) * 3600) / ((3 * 300 + 30)/3.0)
+    frame_qty = (float(frame_duration) * 3600) / 307.6
     frame_qty = math.floor(frame_qty)
 frame_qty = str(frame_qty)
 fileout.write("        CAPTURE " + frame_qty + " FRAMES REQUIREGUIDING True\n")
