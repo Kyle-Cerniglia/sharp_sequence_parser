@@ -94,6 +94,8 @@ if input("Set a start time? (y/n)\n") == 'y':
 #Setup
 fileout.write("    DELAY 1\n")
 fileout.write("    MOUNT UNPARK\n")
+fileout.write("    MOUNT UNPARK\n")
+fileout.write("    DELAY 1\n")
 fileout.write("    STILL MODE\n")
 
 #Set cooler temperature
