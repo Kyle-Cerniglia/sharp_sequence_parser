@@ -148,12 +148,12 @@ else:#Assuming narrowband
     fileout.write("        GUIDING DITHER EVERY 3 FRAMES\n")
 frame_duration = input("Enter number of hours to capture data\n")
 # Remove 11 minutes of setup time from the first target so that stop time is correct
-frame_duration = frame_duration - (11.0 / 60.0)
+frame_duration_f = float(frame_duration) - (11.0 / 60.0)
 if band_type == 'b':
-    frame_qty = (float(frame_duration) * 3600) / 35.08
+    frame_qty = (float(frame_duration_f) * 3600) / 35.08
     frame_qty = math.floor(frame_qty)
 else:#Assuming narrowband
-    frame_qty = (float(frame_duration) * 3600) / 307.6
+    frame_qty = (float(frame_duration_f) * 3600) / 307.6
     frame_qty = math.floor(frame_qty)
 frame_qty = str(frame_qty)
 fileout.write("        CAPTURE " + frame_qty + " FRAMES REQUIREGUIDING True\n")
