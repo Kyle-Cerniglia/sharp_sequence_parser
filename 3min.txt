@@ -1,0 +1,7 @@
+C5: 7:30-1:45
+Horsehead: 1:45-5:00 (3h 15m)
+
+Actual horsehead time: 3h 17m
+Actual horsehead frames: 63
+
+188
