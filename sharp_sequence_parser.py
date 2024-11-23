@@ -51,6 +51,7 @@ def extra_target():
     #Set guiding and frame quantity
     fileout.write("    GUIDING CONNECT ABORT False\n")
     fileout.write("    GUIDING START\n")
+    fileout.write("    DELAY 20\n")
     fileout.write("    PRESERVE CAMERA SETTINGS\n")
     fileout.write("        FRAMETYPE Light\n")
     if band_type == 'b':
@@ -148,6 +149,7 @@ fileout.write("    DELAY 10\n")
 #Set guiding and frame quantity
 fileout.write("    GUIDING CONNECT ABORT False\n")
 fileout.write("    GUIDING START\n")
+fileout.write("    DELAY 20\n")
 fileout.write("    PRESERVE CAMERA SETTINGS\n")
 fileout.write("        FRAMETYPE Light\n")
 if band_type == 'b':
