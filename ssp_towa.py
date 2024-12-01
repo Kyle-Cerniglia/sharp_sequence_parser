@@ -41,12 +41,20 @@ def extra_target():
         fileout.write("    SET EXPOSURE TO 180\n")
 
     #Platesolve and correct position
-    fileout.write("    PRESERVE CAMERA SETTINGS\n")
-    fileout.write("        SET EXPOSURE TO 4\n")
-    fileout.write("        SET GAIN TO 100\n")
-    fileout.write("        MOUNT SOLVEANDSYNC\n")
-    fileout.write("    END PRESERVE\n")
-    fileout.write("    DELAY 10\n")
+    if band_type == 'b':
+        fileout.write("    PRESERVE CAMERA SETTINGS\n")
+        fileout.write("        SET EXPOSURE TO 8\n")
+        fileout.write("        SET GAIN TO 100\n")
+        fileout.write("        MOUNT SOLVEANDSYNC\n")
+        fileout.write("    END PRESERVE\n")
+        fileout.write("    DELAY 10\n")
+    else:#Assuming narrowband
+        fileout.write("    PRESERVE CAMERA SETTINGS\n")
+        fileout.write("        SET EXPOSURE TO 30\n")
+        fileout.write("        SET GAIN TO 100\n")
+        fileout.write("        MOUNT SOLVEANDSYNC\n")
+        fileout.write("    END PRESERVE\n")
+        fileout.write("    DELAY 10\n")
 
     #Set guiding and frame quantity
     fileout.write("    GUIDING CONNECT ABORT False\n")
@@ -139,12 +147,20 @@ if band_type == 'n':
     fileout.write("    SET EXPOSURE TO 180\n")
 
 #Platesolve and correct position
-fileout.write("    PRESERVE CAMERA SETTINGS\n")
-fileout.write("        SET EXPOSURE TO 4\n")
-fileout.write("        SET GAIN TO 100\n")
-fileout.write("        MOUNT SOLVEANDSYNC\n")
-fileout.write("    END PRESERVE\n")
-fileout.write("    DELAY 10\n")
+if band_type == 'b':
+    fileout.write("    PRESERVE CAMERA SETTINGS\n")
+    fileout.write("        SET EXPOSURE TO 8\n")
+    fileout.write("        SET GAIN TO 100\n")
+    fileout.write("        MOUNT SOLVEANDSYNC\n")
+    fileout.write("    END PRESERVE\n")
+    fileout.write("    DELAY 10\n")
+else:#Assuming narrowband
+    fileout.write("    PRESERVE CAMERA SETTINGS\n")
+    fileout.write("        SET EXPOSURE TO 30\n")
+    fileout.write("        SET GAIN TO 100\n")
+    fileout.write("        MOUNT SOLVEANDSYNC\n")
+    fileout.write("    END PRESERVE\n")
+    fileout.write("    DELAY 10\n")
 
 #Set guiding and frame quantity
 fileout.write("    GUIDING CONNECT ABORT False\n")
