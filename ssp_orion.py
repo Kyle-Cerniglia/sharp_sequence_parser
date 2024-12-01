@@ -1,4 +1,4 @@
-# Parser for the sharpcap sequencer
+# Parser for the sharpcap sequencer (Orion telescope)
 
 import sys
 import math
@@ -112,7 +112,7 @@ if int(cooler_temp) != 100:
 #Configure image formatting
 fileout.write("    SET COLOUR SPACE TO RAW16\n")
 fileout.write("    SET OUTPUT FORMAT TO \"FITS files (*.fits)\"\n")
-band_type = input("Is the filter (b)roadband or (n)arrowband?\n")
+band_type = input("Is the filter (b)roadband (UV/IR Cut) or (n)arrowband (L-Enhance)?\n")
 if band_type == 'b':
     fileout.write("    LOAD PROFILE \"533 OSC\"\n")
 if band_type == 'n':

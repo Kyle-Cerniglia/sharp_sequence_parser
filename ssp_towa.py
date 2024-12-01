@@ -1,4 +1,4 @@
-# Parser for the sharpcap sequencer
+# Parser for the sharpcap sequencer (Towa telescope)
 
 import sys
 import math
@@ -36,7 +36,7 @@ def extra_target():
     target_name = input("Enter target name\n")
     fileout.write("    TARGETNAME \"" + target_name + "\"\n")
     if band_type == 'b':
-        fileout.write("    SET EXPOSURE TO 30\n")
+        fileout.write("    SET EXPOSURE TO 60\n")
     if band_type == 'n':
         fileout.write("    SET EXPOSURE TO 180\n")
 
@@ -60,7 +60,7 @@ def extra_target():
         fileout.write("        GUIDING DITHER EVERY 6 FRAMES\n")
     frame_duration = input("Enter number of hours to capture data\n")
     if band_type == 'b':
-        frame_qty = (float(frame_duration) * 3600) / 35.08
+        frame_qty = (float(frame_duration) * 3600) / 70.16
         frame_qty = math.floor(frame_qty)
     else:#Assuming narrowband
         frame_qty = (float(frame_duration) * 3600) / 188
@@ -112,7 +112,7 @@ if int(cooler_temp) != 100:
 #Configure image formatting
 fileout.write("    SET COLOUR SPACE TO RAW16\n")
 fileout.write("    SET OUTPUT FORMAT TO \"FITS files (*.fits)\"\n")
-band_type = input("Is the filter (b)roadband or (n)arrowband?\n")
+band_type = input("Is the filter (b)roadband (UV/IR Cut) or (n)arrowband? (L-Pro)\n")
 if band_type == 'b':
     fileout.write("    LOAD PROFILE \"533 OSC\"\n")
 if band_type == 'n':
@@ -134,7 +134,7 @@ fileout.write("    DELAY 20\n")
 target_name = input("Enter target name\n")
 fileout.write("    TARGETNAME \"" + target_name + "\"\n")
 if band_type == 'b':
-    fileout.write("    SET EXPOSURE TO 30\n")
+    fileout.write("    SET EXPOSURE TO 60\n")
 if band_type == 'n':
     fileout.write("    SET EXPOSURE TO 180\n")
 
@@ -160,7 +160,7 @@ frame_duration = input("Enter number of hours to capture data\n")
 # Remove 11 minutes of setup time from the first target so that stop time is correct
 frame_duration_f = float(frame_duration) - (11.0 / 60.0)
 if band_type == 'b':
-    frame_qty = (float(frame_duration_f) * 3600) / 35.08
+    frame_qty = (float(frame_duration_f) * 3600) / 70.16
     frame_qty = math.floor(frame_qty)
 else:#Assuming narrowband
     frame_qty = (float(frame_duration_f) * 3600) / 188
