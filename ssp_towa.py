@@ -4,6 +4,15 @@ import sys
 import math
 
 def extra_target():
+    # Define globals
+    global ra_h
+    global ra_m
+    global ra_s
+    global dec_d
+    global dec_m
+    global dec_s
+    global target_name
+    
     #Setup
     fileout.write("    DELAY 1\n")
     fileout.write("    STILL MODE\n")
@@ -73,12 +82,124 @@ def extra_target():
     else:#Assuming narrowband
         frame_qty = (float(frame_duration) * 3600) / 188
         frame_qty = math.floor(frame_qty)
-    frame_qty = str(frame_qty)
-    fileout.write("        CAPTURE " + frame_qty + " FRAMES REQUIREGUIDING True\n")
+    # Handle the first 1-hour exposure
+    if band_type == 'b':
+        if (frame_qty > 60):
+            frame_qty_s = str(60)
+            fileout.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
+            fileout.write("        GUIDING DITHER EVERY STOP\n")
+            fileout.write("    END PRESERVE\n")
+            fileout.write("    GUIDING STOP\n")
+            fileout.write("    GUIDING DISCONNECT\n\n")
+            frame_qty = frame_qty - 60
+        else:
+            frame_qty_s = str(frame_qty)
+            fileout.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
+            fileout.write("        GUIDING DITHER EVERY STOP\n")
+            fileout.write("    END PRESERVE\n")
+            fileout.write("    GUIDING STOP\n")
+            fileout.write("    GUIDING DISCONNECT\n\n")
+            frame_qty = 0
+    else:#Assuming narrowband
+        if (frame_qty > 20):
+            frame_qty_s = str(20)
+            fileout.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
+            fileout.write("        GUIDING DITHER EVERY STOP\n")
+            fileout.write("    END PRESERVE\n")
+            fileout.write("    GUIDING STOP\n")
+            fileout.write("    GUIDING DISCONNECT\n\n")
+            frame_qty = frame_qty - 20
+        else:
+            frame_qty_s = str(frame_qty)
+            fileout.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
+            fileout.write("        GUIDING DITHER EVERY STOP\n")
+            fileout.write("    END PRESERVE\n")
+            fileout.write("    GUIDING STOP\n")
+            fileout.write("    GUIDING DISCONNECT\n\n")
+            frame_qty = 0
+
+    # Split up additional frames into 1 hour chunks to counteract tube flexure
+    while (frame_qty > 0):
+        if band_type == 'b':
+            if (frame_qty > 60):
+                repeat_target(60)
+                frame_qty = frame_qty - 60
+            else:
+                repeat_target(frame_qty)
+                frame_qty = 0
+        else:#Assuming narrowband
+            if (frame_qty > 20):
+                repeat_target(20)
+                frame_qty = frame_qty - 20
+            else:
+                repeat_target(frame_qty)
+                frame_qty = 0
+
+def repeat_target(frames):
+    # Define globals
+    global frame_qty
+
+    #Setup
+    fileout.write("    DELAY 1\n")
+    fileout.write("    STILL MODE\n")
+
+    #Set cooler temperature
+    if int(cooler_temp) != 100:
+        fileout.write("    COOL DOWN TO " + cooler_temp + " RATE 8 TOLERANCE 1\n")
+
+    #Configure image formatting
+    fileout.write("    SET COLOUR SPACE TO RAW16\n")
+    fileout.write("    SET OUTPUT FORMAT TO \"FITS files (*.fits)\"\n")
+    if band_type == 'b':
+        fileout.write("    LOAD PROFILE \"533 OSC\"\n")
+    if band_type == 'n':
+        fileout.write("    LOAD PROFILE \"533 HO\"\n")
+        
+    fileout.write("    MOUNT CONNECT\n")
+
+    #Configure target
+    fileout.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + dec_d + " " + dec_m + " " + dec_s + "\"\n")
+    fileout.write("    DELAY 20\n")
+
+    #Set target name
+    fileout.write("    TARGETNAME \"" + target_name + "\"\n")
+    if band_type == 'b':
+        fileout.write("    SET EXPOSURE TO 60\n")
+    if band_type == 'n':
+        fileout.write("    SET EXPOSURE TO 180\n")
+
+    #Platesolve and correct position
+    if band_type == 'b':
+        fileout.write("    PRESERVE CAMERA SETTINGS\n")
+        fileout.write("        SET EXPOSURE TO 8\n")
+        fileout.write("        SET GAIN TO 100\n")
+        fileout.write("        MOUNT SOLVEANDSYNC\n")
+        fileout.write("    END PRESERVE\n")
+        fileout.write("    DELAY 10\n")
+    else:#Assuming narrowband
+        fileout.write("    PRESERVE CAMERA SETTINGS\n")
+        fileout.write("        SET EXPOSURE TO 30\n")
+        fileout.write("        SET GAIN TO 100\n")
+        fileout.write("        MOUNT SOLVEANDSYNC\n")
+        fileout.write("    END PRESERVE\n")
+        fileout.write("    DELAY 10\n")
+
+    #Set guiding and frame quantity
+    fileout.write("    GUIDING CONNECT ABORT False\n")
+    fileout.write("    GUIDING START\n")
+    fileout.write("    DELAY 20\n")
+    fileout.write("    PRESERVE CAMERA SETTINGS\n")
+    fileout.write("        FRAMETYPE Light\n")
+    if band_type == 'b':
+        fileout.write("        GUIDING DITHER EVERY 10 FRAMES\n")
+    else:#Assuming narrowband
+        fileout.write("        GUIDING DITHER EVERY 6 FRAMES\n")
+    frame_qty_s = str(frames)
+    fileout.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
     fileout.write("        GUIDING DITHER EVERY STOP\n")
     fileout.write("    END PRESERVE\n")
     fileout.write("    GUIDING STOP\n")
-    fileout.write("    GUIDING DISCONNECT\n")
+    fileout.write("    GUIDING DISCONNECT\n\n")
 
 if len(sys.argv) != 1:
     print('Formatting error!')
@@ -181,18 +302,65 @@ if band_type == 'b':
 else:#Assuming narrowband
     frame_qty = (float(frame_duration_f) * 3600) / 188
     frame_qty = math.floor(frame_qty)
-frame_qty = str(frame_qty)
-fileout.write("        CAPTURE " + frame_qty + " FRAMES REQUIREGUIDING True\n")
-fileout.write("        GUIDING DITHER EVERY STOP\n")
-fileout.write("    END PRESERVE\n")
-fileout.write("    GUIDING STOP\n")
-fileout.write("    GUIDING DISCONNECT\n")
+
+# Handle the first 1-hour exposure
+if band_type == 'b':
+    if (frame_qty > 60):
+        frame_qty_s = str(60)
+        fileout.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
+        fileout.write("        GUIDING DITHER EVERY STOP\n")
+        fileout.write("    END PRESERVE\n")
+        fileout.write("    GUIDING STOP\n")
+        fileout.write("    GUIDING DISCONNECT\n\n")
+        frame_qty = frame_qty - 60
+    else:
+        frame_qty_s = str(frame_qty)
+        fileout.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
+        fileout.write("        GUIDING DITHER EVERY STOP\n")
+        fileout.write("    END PRESERVE\n")
+        fileout.write("    GUIDING STOP\n")
+        fileout.write("    GUIDING DISCONNECT\n\n")
+        frame_qty = 0
+else:#Assuming narrowband
+    if (frame_qty > 20):
+        frame_qty_s = str(20)
+        fileout.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
+        fileout.write("        GUIDING DITHER EVERY STOP\n")
+        fileout.write("    END PRESERVE\n")
+        fileout.write("    GUIDING STOP\n")
+        fileout.write("    GUIDING DISCONNECT\n\n")
+        frame_qty = frame_qty - 20
+    else:
+        frame_qty_s = str(frame_qty)
+        fileout.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
+        fileout.write("        GUIDING DITHER EVERY STOP\n")
+        fileout.write("    END PRESERVE\n")
+        fileout.write("    GUIDING STOP\n")
+        fileout.write("    GUIDING DISCONNECT\n\n")
+        frame_qty = 0
+
+# Split up additional frames into 1 hour chunks to counteract tube flexure
+while (frame_qty > 0):
+    if band_type == 'b':
+        if (frame_qty > 60):
+            repeat_target(60)
+            frame_qty = frame_qty - 60
+        else:
+            repeat_target(frame_qty)
+            frame_qty = 0
+    else:#Assuming narrowband
+        if (frame_qty > 20):
+            repeat_target(20)
+            frame_qty = frame_qty - 20
+        else:
+            repeat_target(frame_qty)
+            frame_qty = 0
 
 #Insert additional targets
 while input("Enter additional target? (y/n)") == 'y':
     extra_target()
 
-#Shutdown
+#Final Shutdown
 fileout.write("    MOUNT PARK\n")
 if int(cooler_temp) != 100:
     fileout.write("    SET COOLER OFF\n")
