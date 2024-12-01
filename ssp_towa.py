@@ -63,7 +63,7 @@ def extra_target():
     fileout.write("    PRESERVE CAMERA SETTINGS\n")
     fileout.write("        FRAMETYPE Light\n")
     if band_type == 'b':
-        fileout.write("        GUIDING DITHER EVERY 12 FRAMES\n")
+        fileout.write("        GUIDING DITHER EVERY 10 FRAMES\n")
     else:#Assuming narrowband
         fileout.write("        GUIDING DITHER EVERY 6 FRAMES\n")
     frame_duration = input("Enter number of hours to capture data\n")
@@ -169,7 +169,7 @@ fileout.write("    DELAY 20\n")
 fileout.write("    PRESERVE CAMERA SETTINGS\n")
 fileout.write("        FRAMETYPE Light\n")
 if band_type == 'b':
-    fileout.write("        GUIDING DITHER EVERY 12 FRAMES\n")
+    fileout.write("        GUIDING DITHER EVERY 10 FRAMES\n")
 else:#Assuming narrowband
     fileout.write("        GUIDING DITHER EVERY 6 FRAMES\n")
 frame_duration = input("Enter number of hours to capture data\n")
