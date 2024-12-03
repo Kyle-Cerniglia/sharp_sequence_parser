@@ -72,7 +72,7 @@ def extra_target():
         frame_qty = (float(frame_duration) * 3600) / 70.16
         frame_qty = math.floor(frame_qty)
     else:#Assuming narrowband
-        frame_qty = (float(frame_duration) * 3600) / 188
+        frame_qty = (float(frame_duration) * 3600) / 181.73
         frame_qty = math.floor(frame_qty)
     # Handle the first 1-hour exposure
     if band_type == 'b':
@@ -282,7 +282,7 @@ if band_type == 'b':
     frame_qty = (float(frame_duration_f) * 3600) / 70.16
     frame_qty = math.floor(frame_qty)
 else:#Assuming narrowband
-    frame_qty = (float(frame_duration_f) * 3600) / 188
+    frame_qty = (float(frame_duration_f) * 3600) / 181.73
     frame_qty = math.floor(frame_qty)
 
 # Handle the first 1-hour exposure
