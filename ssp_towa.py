@@ -130,6 +130,12 @@ def extra_target():
 def repeat_target(frames):
     # Define globals
     global frame_qty
+    
+    # Park to reset position as small corrections don't always work
+    fileout.write("    MOUNT PARK\n")
+    fileout.write("    DELAY 30\n")
+    fileout.write("    MOUNT UNPARK\n")
+    fileout.write("    MOUNT UNPARK\n")
 
     #Setup
     fileout.write("    DELAY 1\n")
