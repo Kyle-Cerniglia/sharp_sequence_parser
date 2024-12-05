@@ -76,14 +76,14 @@ def extra_target():
         frame_qty = math.floor(frame_qty)
     # Handle the first 1-hour exposure
     if band_type == 'b':
-        if (frame_qty > 60):
-            frame_qty_s = str(60)
+        if (frame_qty > 120):
+            frame_qty_s = str(120)
             fileout.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
             fileout.write("        GUIDING DITHER EVERY STOP\n")
             fileout.write("    END PRESERVE\n")
             fileout.write("    GUIDING STOP\n")
             fileout.write("    GUIDING DISCONNECT\n\n")
-            frame_qty = frame_qty - 60
+            frame_qty = frame_qty - 120
         else:
             frame_qty_s = str(frame_qty)
             fileout.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
@@ -93,14 +93,14 @@ def extra_target():
             fileout.write("    GUIDING DISCONNECT\n\n")
             frame_qty = 0
     else:#Assuming narrowband
-        if (frame_qty > 20):
-            frame_qty_s = str(20)
+        if (frame_qty > 40):
+            frame_qty_s = str(40)
             fileout.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
             fileout.write("        GUIDING DITHER EVERY STOP\n")
             fileout.write("    END PRESERVE\n")
             fileout.write("    GUIDING STOP\n")
             fileout.write("    GUIDING DISCONNECT\n\n")
-            frame_qty = frame_qty - 20
+            frame_qty = frame_qty - 40
         else:
             frame_qty_s = str(frame_qty)
             fileout.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
@@ -113,16 +113,16 @@ def extra_target():
     # Split up additional frames into 1 hour chunks to counteract tube flexure
     while (frame_qty > 0):
         if band_type == 'b':
-            if (frame_qty > 60):
-                repeat_target(60)
-                frame_qty = frame_qty - 60
+            if (frame_qty > 120):
+                repeat_target(120)
+                frame_qty = frame_qty - 120
             else:
                 repeat_target(frame_qty)
                 frame_qty = 0
         else:#Assuming narrowband
-            if (frame_qty > 20):
-                repeat_target(20)
-                frame_qty = frame_qty - 20
+            if (frame_qty > 40):
+                repeat_target(40)
+                frame_qty = frame_qty - 40
             else:
                 repeat_target(frame_qty)
                 frame_qty = 0
@@ -287,14 +287,14 @@ else:#Assuming narrowband
 
 # Handle the first 1-hour exposure
 if band_type == 'b':
-    if (frame_qty > 60):
-        frame_qty_s = str(60)
+    if (frame_qty > 120):
+        frame_qty_s = str(120)
         fileout.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
         fileout.write("        GUIDING DITHER EVERY STOP\n")
         fileout.write("    END PRESERVE\n")
         fileout.write("    GUIDING STOP\n")
         fileout.write("    GUIDING DISCONNECT\n\n")
-        frame_qty = frame_qty - 60
+        frame_qty = frame_qty - 120
     else:
         frame_qty_s = str(frame_qty)
         fileout.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
@@ -304,14 +304,14 @@ if band_type == 'b':
         fileout.write("    GUIDING DISCONNECT\n\n")
         frame_qty = 0
 else:#Assuming narrowband
-    if (frame_qty > 20):
-        frame_qty_s = str(20)
+    if (frame_qty > 40):
+        frame_qty_s = str(40)
         fileout.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
         fileout.write("        GUIDING DITHER EVERY STOP\n")
         fileout.write("    END PRESERVE\n")
         fileout.write("    GUIDING STOP\n")
         fileout.write("    GUIDING DISCONNECT\n\n")
-        frame_qty = frame_qty - 20
+        frame_qty = frame_qty - 40
     else:
         frame_qty_s = str(frame_qty)
         fileout.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
@@ -324,16 +324,16 @@ else:#Assuming narrowband
 # Split up additional frames into 1 hour chunks to counteract tube flexure
 while (frame_qty > 0):
     if band_type == 'b':
-        if (frame_qty > 60):
-            repeat_target(60)
-            frame_qty = frame_qty - 60
+        if (frame_qty > 120):
+            repeat_target(120)
+            frame_qty = frame_qty - 120
         else:
             repeat_target(frame_qty)
             frame_qty = 0
     else:#Assuming narrowband
-        if (frame_qty > 20):
-            repeat_target(20)
-            frame_qty = frame_qty - 20
+        if (frame_qty > 40):
+            repeat_target(40)
+            frame_qty = frame_qty - 40
         else:
             repeat_target(frame_qty)
             frame_qty = 0
