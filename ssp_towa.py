@@ -51,7 +51,7 @@ def extra_target():
 
     #Platesolve and correct position
     fileout.write("    PRESERVE CAMERA SETTINGS\n")
-    fileout.write("        SET EXPOSURE TO 8\n")
+    fileout.write("        SET EXPOSURE TO 12\n")
     fileout.write("        SET GAIN TO 100\n")
     fileout.write("        MOUNT SOLVEANDSYNC\n")
     fileout.write("    END PRESERVE\n")
@@ -168,7 +168,7 @@ def repeat_target(frames):
 
     #Platesolve and correct position
     fileout.write("    PRESERVE CAMERA SETTINGS\n")
-    fileout.write("        SET EXPOSURE TO 8\n")
+    fileout.write("        SET EXPOSURE TO 12\n")
     fileout.write("        SET GAIN TO 100\n")
     fileout.write("        MOUNT SOLVEANDSYNC\n")
     fileout.write("    END PRESERVE\n")
@@ -259,7 +259,7 @@ if band_type == 'n':
 
 #Platesolve and correct position
 fileout.write("    PRESERVE CAMERA SETTINGS\n")
-fileout.write("        SET EXPOSURE TO 8\n")
+fileout.write("        SET EXPOSURE TO 12\n")
 fileout.write("        SET GAIN TO 100\n")
 fileout.write("        MOUNT SOLVEANDSYNC\n")
 fileout.write("    END PRESERVE\n")
