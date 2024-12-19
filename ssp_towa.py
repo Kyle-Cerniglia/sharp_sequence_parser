@@ -284,59 +284,13 @@ if band_type == 'b':
 else:#Assuming narrowband
     frame_qty = (float(frame_duration_f) * 3600) / 181.73
     frame_qty = math.floor(frame_qty)
-
-# Handle the first 1-hour exposure
-if band_type == 'b':
-    if (frame_qty > 120):
-        frame_qty_s = str(120)
-        fileout.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
-        fileout.write("        GUIDING DITHER EVERY STOP\n")
-        fileout.write("    END PRESERVE\n")
-        fileout.write("    GUIDING STOP\n")
-        fileout.write("    GUIDING DISCONNECT\n\n")
-        frame_qty = frame_qty - 120
-    else:
-        frame_qty_s = str(frame_qty)
-        fileout.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
-        fileout.write("        GUIDING DITHER EVERY STOP\n")
-        fileout.write("    END PRESERVE\n")
-        fileout.write("    GUIDING STOP\n")
-        fileout.write("    GUIDING DISCONNECT\n\n")
-        frame_qty = 0
-else:#Assuming narrowband
-    if (frame_qty > 40):
-        frame_qty_s = str(40)
-        fileout.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
-        fileout.write("        GUIDING DITHER EVERY STOP\n")
-        fileout.write("    END PRESERVE\n")
-        fileout.write("    GUIDING STOP\n")
-        fileout.write("    GUIDING DISCONNECT\n\n")
-        frame_qty = frame_qty - 40
-    else:
-        frame_qty_s = str(frame_qty)
-        fileout.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
-        fileout.write("        GUIDING DITHER EVERY STOP\n")
-        fileout.write("    END PRESERVE\n")
-        fileout.write("    GUIDING STOP\n")
-        fileout.write("    GUIDING DISCONNECT\n\n")
-        frame_qty = 0
-
-# Split up additional frames into 1 hour chunks to counteract tube flexure
-while (frame_qty > 0):
-    if band_type == 'b':
-        if (frame_qty > 120):
-            repeat_target(120)
-            frame_qty = frame_qty - 120
-        else:
-            repeat_target(frame_qty)
-            frame_qty = 0
-    else:#Assuming narrowband
-        if (frame_qty > 40):
-            repeat_target(40)
-            frame_qty = frame_qty - 40
-        else:
-            repeat_target(frame_qty)
-            frame_qty = 0
+    
+frame_qty_s = str(frame_qty)
+fileout.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
+fileout.write("        GUIDING DITHER EVERY STOP\n")
+fileout.write("    END PRESERVE\n")
+fileout.write("    GUIDING STOP\n")
+fileout.write("    GUIDING DISCONNECT\n\n")
 
 #Insert additional targets
 while input("Enter additional target? (y/n)") == 'y':
