@@ -3,307 +3,147 @@
 import sys
 import math
 
-def extra_target() -> None:
-    # Define globals
-    global ra_h
-    global ra_m
-    global ra_s
-    global dec_d
-    global dec_m
-    global dec_s
-    global target_name
+class Session:
+    def __init__(
+        self, outfile, temperature, filter_type
+    ):
+        self.outfile = outfile
+        self.temperature = temperature
+        self.filter_type = filter_type
     
-    #Setup
-    fileout.write("    DELAY 1\n")
-    fileout.write("    STILL MODE\n")
-
-    #Set cooler temperature
-    if int(cooler_temp) != 100:
-        fileout.write("    COOL DOWN TO " + cooler_temp + " RATE 8 TOLERANCE 1\n")
-
-    #Configure image formatting
-    fileout.write("    SET COLOUR SPACE TO RAW16\n")
-    fileout.write("    SET OUTPUT FORMAT TO \"FITS files (*.fits)\"\n")
-    if band_type == 'b':
-        fileout.write("    LOAD PROFILE \"533 OSC\"\n")
-    if band_type == 'n':
-        fileout.write("    LOAD PROFILE \"533 HO\"\n")
-        
-    fileout.write("    MOUNT CONNECT\n")
-
-    #Configure target
-    ra_h = input("Enter J2000 coordinates (RA h)\n")
-    ra_m = input("Enter J2000 coordinates (RA m)\n")
-    ra_s = input("Enter J2000 coordinates (RA s)\n")
-    dec_d = input("Enter J2000 coordinates (DEC d)\n")
-    dec_m = input("Enter J2000 coordinates (DEC m)\n")
-    dec_s = input("Enter J2000 coordinates (DEC s)\n")
-    fileout.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + dec_d + " " + dec_m + " " + dec_s + "\"\n")
-    fileout.write("    DELAY 20\n")
-
-    #Set target name
-    target_name = input("Enter target name\n")
-    fileout.write("    TARGETNAME \"" + target_name + "\"\n")
-    if band_type == 'b':
-        fileout.write("    SET EXPOSURE TO 60\n")
-    if band_type == 'n':
-        fileout.write("    SET EXPOSURE TO 180\n")
-
-    #Platesolve and correct position
-    fileout.write("    PRESERVE CAMERA SETTINGS\n")
-    fileout.write("        SET EXPOSURE TO 12\n")
-    fileout.write("        SET GAIN TO 100\n")
-    fileout.write("        MOUNT SOLVEANDSYNC\n")
-    fileout.write("    END PRESERVE\n")
-    fileout.write("    DELAY 10\n")
-
-    #Set guiding and frame quantity
-    fileout.write("    GUIDING CONNECT ABORT False\n")
-    fileout.write("    GUIDING START\n")
-    fileout.write("    DELAY 20\n")
-    fileout.write("    PRESERVE CAMERA SETTINGS\n")
-    fileout.write("        FRAMETYPE Light\n")
-    if band_type == 'b':
-        fileout.write("        GUIDING DITHER EVERY 10 FRAMES\n")
-    else:#Assuming narrowband
-        fileout.write("        GUIDING DITHER EVERY 6 FRAMES\n")
-    frame_duration = input("Enter number of hours to capture data\n")
-    if band_type == 'b':
-        frame_qty = (float(frame_duration) * 3600) / 70.16
-        frame_qty = math.floor(frame_qty)
-    else:#Assuming narrowband
-        frame_qty = (float(frame_duration) * 3600) / 181.73
-        frame_qty = math.floor(frame_qty)
-    # Handle the first 1-hour exposure
-    if band_type == 'b':
-        if (frame_qty > 120):
-            frame_qty_s = str(120)
-            fileout.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
-            fileout.write("        GUIDING DITHER EVERY STOP\n")
-            fileout.write("    END PRESERVE\n")
-            fileout.write("    GUIDING STOP\n")
-            fileout.write("    GUIDING DISCONNECT\n\n")
-            frame_qty = frame_qty - 120
-        else:
-            frame_qty_s = str(frame_qty)
-            fileout.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
-            fileout.write("        GUIDING DITHER EVERY STOP\n")
-            fileout.write("    END PRESERVE\n")
-            fileout.write("    GUIDING STOP\n")
-            fileout.write("    GUIDING DISCONNECT\n\n")
-            frame_qty = 0
-    else:#Assuming narrowband
-        if (frame_qty > 40):
-            frame_qty_s = str(40)
-            fileout.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
-            fileout.write("        GUIDING DITHER EVERY STOP\n")
-            fileout.write("    END PRESERVE\n")
-            fileout.write("    GUIDING STOP\n")
-            fileout.write("    GUIDING DISCONNECT\n\n")
-            frame_qty = frame_qty - 40
-        else:
-            frame_qty_s = str(frame_qty)
-            fileout.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
-            fileout.write("        GUIDING DITHER EVERY STOP\n")
-            fileout.write("    END PRESERVE\n")
-            fileout.write("    GUIDING STOP\n")
-            fileout.write("    GUIDING DISCONNECT\n\n")
-            frame_qty = 0
-
-    # Split up additional frames into 1 hour chunks to counteract tube flexure
-    while (frame_qty > 0):
-        if band_type == 'b':
-            if (frame_qty > 120):
-                repeat_target(120)
-                frame_qty = frame_qty - 120
+    def start_time(self) -> None:
+        #Set start time
+        self.outfile.write("SEQUENCE\n")
+    
+        if input("Set a start time? (y/n)\n") == 'y':
+            hour = input("Enter hour start (24h)\n")
+            minute = input("Enter minute start\n")
+            if int(minute) < 10:
+                minute = "0" + minute
+            if int(hour) < 12:
+                self.outfile.write("    WAIT UNTIL LOCALTIME \"" + hour + ":" + minute + " AM\"\n")
             else:
-                repeat_target(frame_qty)
-                frame_qty = 0
+                hour = str(int(hour) - 12);
+                self.outfile.write("    WAIT UNTIL LOCALTIME \"" + hour + ":" + minute + " PM\"\n")
+                
+    def unpark(self) -> None:
+        self.outfile.write("    DELAY 1\n")
+        self.outfile.write("    MOUNT UNPARK\n")
+        self.outfile.write("    MOUNT UNPARK\n")
+    
+    def set_temp(self) -> None:
+        #Set cooler temperature
+        self.temperature = input("Set cooler temp C (100 to disable)\n")
+        
+    def set_filter(self) -> None:    
+        self.filter_type = input("Is the filter (b)roadband (UV/IR Cut) or (n)arrowband (L-Pro)?\n")
+
+    def create_target(self) -> None:
+        #Setup
+        self.outfile.write("    DELAY 1\n")
+        self.outfile.write("    STILL MODE\n")
+
+        #Set cooler temperature
+        if int(self.temperature) != 100:
+            self.outfile.write("    COOL DOWN TO " + self.temperature + " RATE 8 TOLERANCE 1\n")
+
+        #Configure image formatting
+        self.outfile.write("    SET COLOUR SPACE TO RAW16\n")
+        self.outfile.write("    SET OUTPUT FORMAT TO \"FITS files (*.fits)\"\n")
+        if self.filter_type == 'b':
+            self.outfile.write("    LOAD PROFILE \"533 OSC\"\n")
+        if self.filter_type == 'n':
+            self.outfile.write("    LOAD PROFILE \"533 HO\"\n")
+            
+        self.outfile.write("    MOUNT CONNECT\n")
+
+        #Configure target
+        ra_h = input("Enter J2000 coordinates (RA h)\n")
+        ra_m = input("Enter J2000 coordinates (RA m)\n")
+        ra_s = input("Enter J2000 coordinates (RA s)\n")
+        dec_d = input("Enter J2000 coordinates (DEC d)\n")
+        dec_m = input("Enter J2000 coordinates (DEC m)\n")
+        dec_s = input("Enter J2000 coordinates (DEC s)\n")
+        self.outfile.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + dec_d + " " + dec_m + " " + dec_s + "\"\n")
+        self.outfile.write("    DELAY 20\n")
+
+        #Set target name
+        target_name = input("Enter target name\n")
+        self.outfile.write("    TARGETNAME \"" + target_name + "\"\n")
+        if self.filter_type == 'b':
+            self.outfile.write("    SET EXPOSURE TO 60\n")
+        if self.filter_type == 'n':
+            self.outfile.write("    SET EXPOSURE TO 180\n")
+
+        #Platesolve and correct position
+        self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
+        self.outfile.write("        SET EXPOSURE TO 12\n")
+        self.outfile.write("        SET GAIN TO 100\n")
+        self.outfile.write("        MOUNT SOLVEANDSYNC\n")
+        self.outfile.write("    END PRESERVE\n")
+        self.outfile.write("    DELAY 10\n")
+
+        #Set guiding and frame quantity
+        self.outfile.write("    GUIDING CONNECT ABORT False\n")
+        self.outfile.write("    GUIDING START\n")
+        self.outfile.write("    DELAY 20\n")
+        self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
+        self.outfile.write("        FRAMETYPE Light\n")
+        if self.filter_type == 'b':
+            self.outfile.write("        GUIDING DITHER EVERY 10 FRAMES\n")
         else:#Assuming narrowband
-            if (frame_qty > 40):
-                repeat_target(40)
-                frame_qty = frame_qty - 40
-            else:
-                repeat_target(frame_qty)
-                frame_qty = 0
-
-def repeat_target(frames) -> None:
-    # Define globals
-    global frame_qty
-    
-    # Park to reset position as small corrections don't always work
-    fileout.write("    MOUNT PARK\n")
-    fileout.write("    DELAY 30\n")
-    fileout.write("    MOUNT UNPARK\n")
-    fileout.write("    MOUNT UNPARK\n")
-
-    #Setup
-    fileout.write("    DELAY 1\n")
-    fileout.write("    STILL MODE\n")
-
-    #Set cooler temperature
-    if int(cooler_temp) != 100:
-        fileout.write("    COOL DOWN TO " + cooler_temp + " RATE 8 TOLERANCE 1\n")
-
-    #Configure image formatting
-    fileout.write("    SET COLOUR SPACE TO RAW16\n")
-    fileout.write("    SET OUTPUT FORMAT TO \"FITS files (*.fits)\"\n")
-    if band_type == 'b':
-        fileout.write("    LOAD PROFILE \"533 OSC\"\n")
-    if band_type == 'n':
-        fileout.write("    LOAD PROFILE \"533 HO\"\n")
+            self.outfile.write("        GUIDING DITHER EVERY 6 FRAMES\n")
+        frame_duration = input("Enter number of hours to capture data\n")
+        if self.filter_type == 'b':
+            frame_qty = (float(frame_duration) * 3600) / 70.16
+            frame_qty = math.floor(frame_qty)
+        else:#Assuming narrowband
+            frame_qty = (float(frame_duration) * 3600) / 181.73
+            frame_qty = math.floor(frame_qty)
+            
+        frame_qty_s = str(frame_qty)
+        self.outfile.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
+        self.outfile.write("        GUIDING DITHER EVERY STOP\n")
+        self.outfile.write("    END PRESERVE\n")
+        self.outfile.write("    GUIDING STOP\n")
+        self.outfile.write("    GUIDING DISCONNECT\n\n")
         
-    fileout.write("    MOUNT CONNECT\n")
+    def shutdown(self) -> None:
+        #Final Shutdown
+        self.outfile.write("    MOUNT PARK\n")
+        if int(self.temperature) != 100:
+            self.outfile.write("    SET COOLER OFF\n")
+        self.outfile.write("END SEQUENCE\n")
+        self.outfile.close()
 
-    #Configure target
-    fileout.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + dec_d + " " + dec_m + " " + dec_s + "\"\n")
-    fileout.write("    DELAY 20\n")
-
-    #Set target name
-    fileout.write("    TARGETNAME \"" + target_name + "\"\n")
-    if band_type == 'b':
-        fileout.write("    SET EXPOSURE TO 60\n")
-    if band_type == 'n':
-        fileout.write("    SET EXPOSURE TO 180\n")
-
-    #Platesolve and correct position
-    fileout.write("    PRESERVE CAMERA SETTINGS\n")
-    fileout.write("        SET EXPOSURE TO 12\n")
-    fileout.write("        SET GAIN TO 100\n")
-    fileout.write("        MOUNT SOLVEANDSYNC\n")
-    fileout.write("    END PRESERVE\n")
-    fileout.write("    DELAY 10\n")
-
-    #Set guiding and frame quantity
-    fileout.write("    GUIDING CONNECT ABORT False\n")
-    fileout.write("    GUIDING START\n")
-    fileout.write("    DELAY 20\n")
-    fileout.write("    PRESERVE CAMERA SETTINGS\n")
-    fileout.write("        FRAMETYPE Light\n")
-    if band_type == 'b':
-        fileout.write("        GUIDING DITHER EVERY 10 FRAMES\n")
-    else:#Assuming narrowband
-        fileout.write("        GUIDING DITHER EVERY 6 FRAMES\n")
-    frame_qty_s = str(frames)
-    fileout.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
-    fileout.write("        GUIDING DITHER EVERY STOP\n")
-    fileout.write("    END PRESERVE\n")
-    fileout.write("    GUIDING STOP\n")
-    fileout.write("    GUIDING DISCONNECT\n\n")
-
-if len(sys.argv) != 1:
-    print('Formatting error!')
-    print('Example: sharp_sequence_parser.py')
-    quit()
-    
 def main() -> None:
-    filename = "sequence.scs"
+    if len(sys.argv) != 1:
+        print('Formatting error!')
+        print('Example: sharp_sequence_parser.py')
+        quit()
 
     #Prompt for filename and create file
+    filename = "sequence.scs"
     filename = input("Set filename\n")
     fileout = open(filename, "w+")
 
-    fileout.write("SEQUENCE\n")
+    session = Session(fileout, 100, "b")
 
-    #Set start time
-    if input("Set a start time? (y/n)\n") == 'y':
-        hour = input("Enter hour start (24h)\n")
-        minute = input("Enter minute start\n")
-        if int(minute) < 10:
-            minute = "0" + minute
-        if int(hour) < 12:
-            fileout.write("    WAIT UNTIL LOCALTIME \"" + hour + ":" + minute + " AM\"\n")
-        else:
-            hour = str(int(hour) - 12);
-            fileout.write("    WAIT UNTIL LOCALTIME \"" + hour + ":" + minute + " PM\"\n")
+    session.start_time()
+    
+    session.set_temp()
+    
+    session.set_filter()
+    
+    session.unpark()
 
-    #Setup
-    fileout.write("    DELAY 1\n")
-    fileout.write("    MOUNT UNPARK\n")
-    fileout.write("    MOUNT UNPARK\n")
-    fileout.write("    DELAY 1\n")
-    fileout.write("    STILL MODE\n")
-
-    #Set cooler temperature
-    cooler_temp = input("Set cooler temp C (100 to disable)\n")
-    if int(cooler_temp) != 100:
-        fileout.write("    COOL DOWN TO " + cooler_temp + " RATE 8 TOLERANCE 1\n")
-
-    #Configure image formatting
-    fileout.write("    SET COLOUR SPACE TO RAW16\n")
-    fileout.write("    SET OUTPUT FORMAT TO \"FITS files (*.fits)\"\n")
-    band_type = input("Is the filter (b)roadband (UV/IR Cut) or (n)arrowband? (L-Pro)\n")
-    if band_type == 'b':
-        fileout.write("    LOAD PROFILE \"533 OSC\"\n")
-    if band_type == 'n':
-        fileout.write("    LOAD PROFILE \"533 HO\"\n")
-        
-    fileout.write("    MOUNT CONNECT\n")
-
-    #Configure target
-    ra_h = input("Enter J2000 coordinates (RA h)\n")
-    ra_m = input("Enter J2000 coordinates (RA m)\n")
-    ra_s = input("Enter J2000 coordinates (RA s)\n")
-    dec_d = input("Enter J2000 coordinates (DEC d)\n")
-    dec_m = input("Enter J2000 coordinates (DEC m)\n")
-    dec_s = input("Enter J2000 coordinates (DEC s)\n")
-    fileout.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + dec_d + " " + dec_m + " " + dec_s + "\"\n")
-    fileout.write("    DELAY 20\n")
-
-    #Set target name
-    target_name = input("Enter target name\n")
-    fileout.write("    TARGETNAME \"" + target_name + "\"\n")
-    if band_type == 'b':
-        fileout.write("    SET EXPOSURE TO 60\n")
-    if band_type == 'n':
-        fileout.write("    SET EXPOSURE TO 180\n")
-
-    #Platesolve and correct position
-    fileout.write("    PRESERVE CAMERA SETTINGS\n")
-    fileout.write("        SET EXPOSURE TO 12\n")
-    fileout.write("        SET GAIN TO 100\n")
-    fileout.write("        MOUNT SOLVEANDSYNC\n")
-    fileout.write("    END PRESERVE\n")
-    fileout.write("    DELAY 10\n")
-
-    #Set guiding and frame quantity
-    fileout.write("    GUIDING CONNECT ABORT False\n")
-    fileout.write("    GUIDING START\n")
-    fileout.write("    DELAY 20\n")
-    fileout.write("    PRESERVE CAMERA SETTINGS\n")
-    fileout.write("        FRAMETYPE Light\n")
-    if band_type == 'b':
-        fileout.write("        GUIDING DITHER EVERY 10 FRAMES\n")
-    else:#Assuming narrowband
-        fileout.write("        GUIDING DITHER EVERY 6 FRAMES\n")
-    frame_duration = input("Enter number of hours to capture data\n")
-    # Remove 11 minutes of setup time from the first target so that stop time is correct
-    frame_duration_f = float(frame_duration) - (11.0 / 60.0)
-    if band_type == 'b':
-        frame_qty = (float(frame_duration_f) * 3600) / 70.16
-        frame_qty = math.floor(frame_qty)
-    else:#Assuming narrowband
-        frame_qty = (float(frame_duration_f) * 3600) / 181.73
-        frame_qty = math.floor(frame_qty)
-        
-    frame_qty_s = str(frame_qty)
-    fileout.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
-    fileout.write("        GUIDING DITHER EVERY STOP\n")
-    fileout.write("    END PRESERVE\n")
-    fileout.write("    GUIDING STOP\n")
-    fileout.write("    GUIDING DISCONNECT\n\n")
+    session.create_target()
 
     #Insert additional targets
     while input("Enter additional target? (y/n)") == 'y':
-        extra_target()
+        session.create_target()
 
-    #Final Shutdown
-    fileout.write("    MOUNT PARK\n")
-    if int(cooler_temp) != 100:
-        fileout.write("    SET COOLER OFF\n")
-    fileout.write("END SEQUENCE\n")
-
-    fileout.close()
+    session.shutdown()
 
     print("Sequence file generated!\n")
 
