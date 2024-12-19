@@ -196,8 +196,9 @@ def main() -> None:
         quit()
 
     #Prompt for filename and create file
-    filename = "sequence.scs"
+    filename = ""
     filename = input("Set filename\n")
+    filename += ".scs"
     fileout = open(filename, "w+")
 
     session = Session(fileout, 100, Filters.UVIR, Telescope.ORION, 0, 0, 0, 0)
