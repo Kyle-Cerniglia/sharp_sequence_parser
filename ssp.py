@@ -8,11 +8,14 @@ from enum import auto
 class Telescope(Enum):
     ORION = 1
     TOWA = 2
+    C6_HYPER = 3
     
 class Filters(Enum):
     UVIR = 1
     LENHANCE = 2
     LPRO = 3
+    D1 = 4
+    D2 = 5
 
 # Exposure time
 EXPOSURE_ORION = {
@@ -23,9 +26,17 @@ EXPOSURE_TOWA = {
     Filters.UVIR: 60,
     Filters.LPRO: 180
 }
+EXPOSURE_C6_HYPER = {
+    Filters.UVIR: 30,
+    Filters.LPRO: 30,
+    Filters.LENHANCE: 120,
+    Filters.D1: 240,
+    Filters.D2: 240
+}
 EXPOSURE = {
     Telescope.ORION: EXPOSURE_ORION,
-    Telescope.TOWA: EXPOSURE_TOWA
+    Telescope.TOWA: EXPOSURE_TOWA,
+    Telescope.C6_HYPER: EXPOSURE_C6_HYPER
 }
 
 # Platesolving exposure time
@@ -37,9 +48,17 @@ PLATE_EXPOSURE_TOWA = {
     Filters.UVIR: 12,
     Filters.LPRO: 12
 }
+PLATE_EXPOSURE_C6_HYPER = {
+    Filters.UVIR: 1,
+    Filters.LPRO: 1,
+    Filters.LENHANCE: 2,
+    Filters.D1: 4,
+    Filters.D2: 4
+}
 PLATE_EXPOSURE = {
     Telescope.ORION: PLATE_EXPOSURE_ORION,
-    Telescope.TOWA: PLATE_EXPOSURE_TOWA
+    Telescope.TOWA: PLATE_EXPOSURE_TOWA,
+    Telescope.C6_HYPER: PLATE_EXPOSURE_C6_HYPER
 }
 
 # Time divider for frame calculation
@@ -51,9 +70,17 @@ TIMEDIV_TOWA = {
     Filters.UVIR: 70.16,
     Filters.LPRO: 181.73
 }
+TIMEDIV_C6_HYPER = {
+    Filters.UVIR: 35.08,
+    Filters.LPRO: 35.08,
+    Filters.LENHANCE: 133,
+    Filters.D1: 247,
+    Filters.D2: 247
+}
 TIMEDIV = {
     Telescope.ORION: TIMEDIV_ORION,
-    Telescope.TOWA: TIMEDIV_TOWA
+    Telescope.TOWA: TIMEDIV_TOWA,
+    Telescope.C6_HYPER: TIMEDIV_C6_HYPER
 }
 
 # Frames per dither
@@ -65,9 +92,17 @@ DITHER_TOWA = {
     Filters.UVIR: 10,
     Filters.LPRO: 6
 }
+DITHER_C6_HYPER = {
+    Filters.UVIR: 12,
+    Filters.LPRO: 12,
+    Filters.LENHANCE: 8,
+    Filters.D1: 3,
+    Filters.D2: 3
+}
 DITHER = {
     Telescope.ORION: DITHER_ORION,
-    Telescope.TOWA: DITHER_TOWA
+    Telescope.TOWA: DITHER_TOWA,
+    Telescope.C6_HYPER: DITHER_C6_HYPER
 }
 
 class Session:
@@ -108,11 +143,11 @@ class Session:
         self.temperature = input("Set cooler temp C (100 to disable)\n")
         
     def set_telescope(self) -> None:
-        scope_in = input("Select your telescope:\n[1] = Orion 130ST\n[2] = Towa 339\n")
+        scope_in = input("Select your telescope:\n[1] = Orion 130ST\n[2] = Towa 339\n[3] = C6 (Hyperstar)\n")
         self.telescope_type = Telescope(int(scope_in))
         
     def set_filter(self) -> None:
-        filter_in = input("Select your filter::\n[1] = UV/IR\n[2] = L-Enhance\n[3] = L-Pro\n")
+        filter_in = input("Select your filter::\n[1] = UV/IR\n[2] = L-Enhance\n[3] = L-Pro\n[4] = D1\n[4] = D2\n")
         self.filter_type = Filters(int(filter_in))
     
     def calc_capture_vals(self) -> None:
