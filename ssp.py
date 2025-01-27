@@ -17,6 +17,12 @@ class Filters(Enum):
     D1 = 4
     D2 = 5
 
+class Presets(Enum):
+    ORION_OSC = "533 OSC"
+    ORION_NB = "533 HO"
+    C6H_OSC = "C6H OSC"
+    C6H_NB = "C6H NB"
+
 # Exposure time
 EXPOSURE_ORION = {
     Filters.UVIR: 30,
@@ -147,7 +153,7 @@ class Session:
         self.telescope_type = Telescope(int(scope_in))
         
     def set_filter(self) -> None:
-        filter_in = input("Select your filter::\n[1] = UV/IR\n[2] = L-Enhance\n[3] = L-Pro\n[4] = D1\n[4] = D2\n")
+        filter_in = input("Select your filter::\n[1] = UV/IR\n[2] = L-Enhance\n[3] = L-Pro\n[4] = D1\n[5] = D2\n")
         self.filter_type = Filters(int(filter_in))
     
     def calc_capture_vals(self) -> None:
@@ -155,6 +161,20 @@ class Session:
         self.plate_exposure_time = PLATE_EXPOSURE[self.telescope_type][self.filter_type]
         self.timediv = TIMEDIV[self.telescope_type][self.filter_type]
         self.dither = DITHER[self.telescope_type][self.filter_type]
+        
+    def preset(self) -> None:
+        preset_in = int(input("Select your preset:\n[1] = Orion OSC\n[2] = Orion NB\n[3] = C6 (Hyperstar) OSC\n[4] = C6 (Hyperstar) NB\n"))
+        if preset_in == 1:
+            preset_val = Presets.ORION_OSC
+        elif preset_in == 2:
+            preset_val = Presets.ORION_NB
+        elif preset_in == 3:
+            preset_val = Presets.C6H_OSC
+        elif preset_in == 4:
+            preset_val = Presets.C6H_NB
+        else:
+            raise ValueError("Invalid selection.")
+        self.outfile.write(f"    LOAD PROFILE \"{preset_val.value}\"\n")
 
     def create_target(self) -> None:
         #Setup
@@ -168,10 +188,8 @@ class Session:
         #Configure image formatting
         self.outfile.write("    SET COLOUR SPACE TO RAW16\n")
         self.outfile.write("    SET OUTPUT FORMAT TO \"FITS files (*.fits)\"\n")
-        if self.filter_type == Filters.UVIR:
-            self.outfile.write("    LOAD PROFILE \"533 OSC\"\n")
-        else:
-            self.outfile.write("    LOAD PROFILE \"533 HO\"\n")
+        
+        self.preset()
             
         self.outfile.write("    MOUNT CONNECT\n")
 
