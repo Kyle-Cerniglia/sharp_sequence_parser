@@ -30,34 +30,40 @@ def extra_target():
     dec_m = input("Enter J2000 coordinates (DEC m)\n")
     dec_s = input("Enter J2000 coordinates (DEC s)\n")
     fileout.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + dec_d + " " + dec_m + " " + dec_s + "\"\n")
+    fileout.write("    DELAY 20\n")
 
     #Set target name
     target_name = input("Enter target name\n")
     fileout.write("    TARGETNAME \"" + target_name + "\"\n")
+    if band_type == 'b':
+        fileout.write("    SET EXPOSURE TO 30\n")
+    if band_type == 'n':
+        fileout.write("    SET EXPOSURE TO 180\n")
 
     #Platesolve and correct position
     fileout.write("    PRESERVE CAMERA SETTINGS\n")
-    fileout.write("        SET EXPOSURE TO 2\n")
+    fileout.write("        SET EXPOSURE TO 4\n")
     fileout.write("        SET GAIN TO 100\n")
     fileout.write("        MOUNT SOLVEANDSYNC\n")
     fileout.write("    END PRESERVE\n")
-    fileout.write("    DELAY 5\n")
+    fileout.write("    DELAY 10\n")
 
     #Set guiding and frame quantity
     fileout.write("    GUIDING CONNECT ABORT False\n")
     fileout.write("    GUIDING START\n")
+    fileout.write("    DELAY 20\n")
     fileout.write("    PRESERVE CAMERA SETTINGS\n")
     fileout.write("        FRAMETYPE Light\n")
     if band_type == 'b':
         fileout.write("        GUIDING DITHER EVERY 12 FRAMES\n")
     else:#Assuming narrowband
-        fileout.write("        GUIDING DITHER EVERY 3 FRAMES\n")
+        fileout.write("        GUIDING DITHER EVERY 6 FRAMES\n")
     frame_duration = input("Enter number of hours to capture data\n")
     if band_type == 'b':
-        frame_qty = (float(frame_duration) * 3600) / ((12 * 30 + 30)/12.0)
+        frame_qty = (float(frame_duration) * 3600) / 35.08
         frame_qty = math.floor(frame_qty)
     else:#Assuming narrowband
-        frame_qty = (float(frame_duration) * 3600) / ((3 * 300 + 30)/3.0)
+        frame_qty = (float(frame_duration) * 3600) / 188
         frame_qty = math.floor(frame_qty)
     frame_qty = str(frame_qty)
     fileout.write("        CAPTURE " + frame_qty + " FRAMES REQUIREGUIDING True\n")
@@ -94,6 +100,8 @@ if input("Set a start time? (y/n)\n") == 'y':
 #Setup
 fileout.write("    DELAY 1\n")
 fileout.write("    MOUNT UNPARK\n")
+fileout.write("    MOUNT UNPARK\n")
+fileout.write("    DELAY 1\n")
 fileout.write("    STILL MODE\n")
 
 #Set cooler temperature
@@ -120,34 +128,42 @@ dec_d = input("Enter J2000 coordinates (DEC d)\n")
 dec_m = input("Enter J2000 coordinates (DEC m)\n")
 dec_s = input("Enter J2000 coordinates (DEC s)\n")
 fileout.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + dec_d + " " + dec_m + " " + dec_s + "\"\n")
+fileout.write("    DELAY 20\n")
 
 #Set target name
 target_name = input("Enter target name\n")
 fileout.write("    TARGETNAME \"" + target_name + "\"\n")
+if band_type == 'b':
+    fileout.write("    SET EXPOSURE TO 30\n")
+if band_type == 'n':
+    fileout.write("    SET EXPOSURE TO 180\n")
 
 #Platesolve and correct position
 fileout.write("    PRESERVE CAMERA SETTINGS\n")
-fileout.write("        SET EXPOSURE TO 2\n")
+fileout.write("        SET EXPOSURE TO 4\n")
 fileout.write("        SET GAIN TO 100\n")
 fileout.write("        MOUNT SOLVEANDSYNC\n")
 fileout.write("    END PRESERVE\n")
-fileout.write("    DELAY 5\n")
+fileout.write("    DELAY 10\n")
 
 #Set guiding and frame quantity
 fileout.write("    GUIDING CONNECT ABORT False\n")
 fileout.write("    GUIDING START\n")
+fileout.write("    DELAY 20\n")
 fileout.write("    PRESERVE CAMERA SETTINGS\n")
 fileout.write("        FRAMETYPE Light\n")
 if band_type == 'b':
     fileout.write("        GUIDING DITHER EVERY 12 FRAMES\n")
 else:#Assuming narrowband
-    fileout.write("        GUIDING DITHER EVERY 3 FRAMES\n")
+    fileout.write("        GUIDING DITHER EVERY 6 FRAMES\n")
 frame_duration = input("Enter number of hours to capture data\n")
+# Remove 11 minutes of setup time from the first target so that stop time is correct
+frame_duration_f = float(frame_duration) - (11.0 / 60.0)
 if band_type == 'b':
-    frame_qty = (float(frame_duration) * 3600) / ((12 * 30 + 30)/12.0)
+    frame_qty = (float(frame_duration_f) * 3600) / 35.08
     frame_qty = math.floor(frame_qty)
 else:#Assuming narrowband
-    frame_qty = (float(frame_duration) * 3600) / ((3 * 300 + 30)/3.0)
+    frame_qty = (float(frame_duration_f) * 3600) / 188
     frame_qty = math.floor(frame_qty)
 frame_qty = str(frame_qty)
 fileout.write("        CAPTURE " + frame_qty + " FRAMES REQUIREGUIDING True\n")
