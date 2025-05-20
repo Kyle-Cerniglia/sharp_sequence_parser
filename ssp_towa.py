@@ -167,8 +167,14 @@ class Session:
         self.outfile.write("    TARGETNAME \"" + target_name + "\"\n")
         self.outfile.write("    SET EXPOSURE TO " + str(self.exposure_time) + "\n")
 
-        #Platesolve and correct position
+        #Platesolve and correct position twice
         self.outfile.write("    WHEEL MOVE TO 1\n")
+        self.outfile.write("    DELAY 10\n")
+        self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
+        self.outfile.write("        SET EXPOSURE TO 2\n")
+        self.outfile.write("        SET GAIN TO 100\n")
+        self.outfile.write("        MOUNT SOLVEANDSYNC\n")
+        self.outfile.write("    END PRESERVE\n")
         self.outfile.write("    DELAY 10\n")
         self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
         self.outfile.write("        SET EXPOSURE TO 2\n")
