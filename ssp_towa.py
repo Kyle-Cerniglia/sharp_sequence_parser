@@ -133,7 +133,8 @@ class Session:
         
     def preset(self) -> None:
         preset_val = Presets.TOWA
-        self.outfile.write(f"    LOAD PROFILE \"{preset_val.value}\"\n")
+        #self.outfile.write(f"    LOAD PROFILE \"{preset_val.value}\"\n")
+        self.outfile.write(f"    LOAD PROFILE MC8\n")
 
     def create_target(self) -> None:
         #Setup
@@ -145,7 +146,7 @@ class Session:
             self.outfile.write("    COOL DOWN TO " + self.temperature + " RATE 8 TOLERANCE 1\n")
 
         #Configure image formatting
-        self.outfile.write("    SET COLOUR SPACE TO RAW16\n")
+        self.outfile.write("    SET COLOUR SPACE TO MONO16\n")
         self.outfile.write("    SET OUTPUT FORMAT TO \"FITS files (*.fits)\"\n")
         
         self.preset()
