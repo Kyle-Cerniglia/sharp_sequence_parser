@@ -72,9 +72,9 @@ DITHER_TOWA = {
     Filters.RED: 10,
     Filters.GREEN: 10,
     Filters.BLUE: 10,
-    Filters.SII: 6,
-    Filters.HA: 6,
-    Filters.OIII: 6,
+    Filters.SII: 3,
+    Filters.HA: 3,
+    Filters.OIII: 3,
     Filters.NONE: 10
 }
 DITHER = {
