@@ -57,9 +57,9 @@ TIMEDIV_TOWA = {
     Filters.RED: 70.16,
     Filters.GREEN: 70.16,
     Filters.BLUE: 70.16,
-    Filters.SII: 181.73,
-    Filters.HA: 181.73,
-    Filters.OIII: 181.73,
+    Filters.SII: 190.82,
+    Filters.HA: 190.82,
+    Filters.OIII: 190.82,
     Filters.NONE: 70.16
 }
 TIMEDIV = {
