@@ -209,6 +209,7 @@ class Session:
         self.outfile.write("    MOUNT PARK\n")
         if int(self.temperature) != 100:
             self.outfile.write("    SET COOLER OFF\n")
+        self.outfile.write("    WHEEL MOVE TO 1\n")
         self.outfile.write("END SEQUENCE\n")
         self.outfile.close()
 
