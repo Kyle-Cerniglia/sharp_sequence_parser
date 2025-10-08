@@ -243,6 +243,8 @@ def main() -> None:
 
     #Insert additional targets
     while input("Enter additional target? (y/n)") == 'y':
+        session.set_filter()
+        session.calc_capture_vals()
         session.create_target()
 
     session.shutdown()
