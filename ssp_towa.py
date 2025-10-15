@@ -19,7 +19,8 @@ class Filters(Enum):
     NONE = 8
 
 class Presets(Enum):
-    TOWA = "MC8"
+    TOWA_RGB = "MC8_RGB"
+    TOWA_NB = "MC8_NB"
 
 # Exposure time
 EXPOSURE_TOWA = {
@@ -132,9 +133,11 @@ class Session:
         self.dither = DITHER[self.telescope_type][self.filter_type]
         
     def preset(self) -> None:
-        preset_val = Presets.TOWA
-        #self.outfile.write(f"    LOAD PROFILE \"{preset_val.value}\"\n")
-        self.outfile.write(f"    LOAD PROFILE MC8\n")
+        if self.filter_type in [Filters.RED, Filters.GREEN, Filters.BLUE]:
+            preset_val = Presets.TOWA_RGB
+        else:
+            preset_val = Presets.TOWA_NB
+        self.outfile.write(f"    LOAD PROFILE \"{preset_val.value}\"\n")
 
     def create_target(self) -> None:
         #Setup
