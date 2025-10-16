@@ -137,7 +137,8 @@ class Session:
             preset_val = Presets.TOWA_RGB
         else:
             preset_val = Presets.TOWA_NB
-        self.outfile.write(f"    LOAD PROFILE \"{preset_val.value}\"\n")
+        #self.outfile.write(f"    LOAD PROFILE \"{preset_val.value}\"\n")
+        self.outfile.write(f"    LOAD PROFILE {preset_val.value}\n")
 
     def create_target(self) -> None:
         #Setup
