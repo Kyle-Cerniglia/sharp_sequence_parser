@@ -123,7 +123,7 @@ class Session:
         self.telescope_type = Telescope(2)
         
     def set_filter(self) -> None:
-        filter_in = input("Select your filter::\n[1] = Luminance\n[2] = Red\n[3] = Green\n[4] = Blue\n[5] = SII\n[6] = Ha\n[7] = OIII\n[8] = None\n")
+        filter_in = input("Select your filter:\n[1] = Luminance\n[2] = Red\n[3] = Green\n[4] = Blue\n[5] = SII\n[6] = Ha\n[7] = OIII\n[8] = None\n")
         self.filter_type = Filters(int(filter_in))
     
     def calc_capture_vals(self) -> None:
