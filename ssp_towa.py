@@ -137,7 +137,6 @@ class Session:
             preset_val = Presets.TOWA_RGB
         else:
             preset_val = Presets.TOWA_NB
-        #self.outfile.write(f"    LOAD PROFILE \"{preset_val.value}\"\n")
         self.outfile.write(f"    LOAD PROFILE {preset_val.value}\n")
 
     def create_target(self) -> None:
@@ -147,7 +146,7 @@ class Session:
 
         #Set cooler temperature
         if int(self.temperature) != 100:
-            self.outfile.write("    COOL DOWN TO " + self.temperature + " RATE 8 TOLERANCE 1\n")
+            self.outfile.write("    COOL DOWN TO " + self.temperature + " RATE 25 TOLERANCE 1\n")
 
         #Configure image formatting
         self.outfile.write("    SET COLOUR SPACE TO MONO16\n")
