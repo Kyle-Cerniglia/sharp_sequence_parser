@@ -191,6 +191,8 @@ class Session:
 
         #Set guiding and frame quantity
         self.outfile.write("    GUIDING CONNECT ABORT False\n")
+        self.outfile.write("    GUIDING STOP\n")
+        self.outfile.write("    DELAY 5\n")
         self.outfile.write("    GUIDING START\n")
         self.outfile.write("    DELAY 20\n")
         self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
