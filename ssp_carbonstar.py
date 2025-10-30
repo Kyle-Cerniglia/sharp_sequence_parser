@@ -1,4 +1,5 @@
 # Parser for the sharpcap sequencer
+# Designed for an Minicam8M mounted to a Carbonstar 150
 
 import sys
 import math
@@ -54,14 +55,14 @@ PLATE_EXPOSURE = {
 
 # Time divider for frame calculation
 TIMEDIV_CARBON = {
-    Filters.LUMINANCE: 70.16,
-    Filters.RED: 70.16,
-    Filters.GREEN: 70.16,
-    Filters.BLUE: 70.16,
+    Filters.LUMINANCE: 35.08,
+    Filters.RED: 35.08,
+    Filters.GREEN: 35.08,
+    Filters.BLUE: 35.08,
     Filters.SII: 190.82,
     Filters.HA: 190.82,
     Filters.OIII: 190.82,
-    Filters.NONE: 70.16
+    Filters.NONE: 35.08
 }
 TIMEDIV = {
     Telescope.CARBON: TIMEDIV_CARBON
@@ -69,14 +70,14 @@ TIMEDIV = {
 
 # Frames per dither
 DITHER_CARBON = {
-    Filters.LUMINANCE: 10,
-    Filters.RED: 10,
-    Filters.GREEN: 10,
-    Filters.BLUE: 10,
+    Filters.LUMINANCE: 20,
+    Filters.RED: 20,
+    Filters.GREEN: 20,
+    Filters.BLUE: 20,
     Filters.SII: 3,
     Filters.HA: 3,
     Filters.OIII: 3,
-    Filters.NONE: 10
+    Filters.NONE: 20
 }
 DITHER = {
     Telescope.CARBON: DITHER_CARBON
