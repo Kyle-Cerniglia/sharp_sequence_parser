@@ -6,109 +6,80 @@ from enum import Enum
 from enum import auto
 
 class Telescope(Enum):
-    ORION = 1
     TOWA = 2
-    C6_HYPER = 3
     
 class Filters(Enum):
-    UVIR = 1
-    LENHANCE = 2
-    LPRO = 3
-    D1 = 4
-    D2 = 5
+    LUMINANCE = 1
+    RED = 2
+    GREEN = 3
+    BLUE = 4
+    SII = 5
+    HA = 6
+    OIII = 7
+    NONE = 8
 
 class Presets(Enum):
-    ORION_OSC = "533 OSC"
-    ORION_NB = "533 HO"
-    C6H_OSC = "C6H OSC"
-    C6H_NB = "C6H NB"
+    TOWA_RGB = "MC8_RGB"
+    TOWA_NB = "MC8_NB"
 
 # Exposure time
-EXPOSURE_ORION = {
-    Filters.UVIR: 30,
-    Filters.LENHANCE: 180
-}
 EXPOSURE_TOWA = {
-    Filters.UVIR: 60,
-    Filters.LPRO: 180
-}
-EXPOSURE_C6_HYPER = {
-    Filters.UVIR: 30,
-    Filters.LPRO: 30,
-    Filters.LENHANCE: 120,
-    Filters.D1: 240,
-    Filters.D2: 240
+    Filters.LUMINANCE: 2,
+    Filters.RED: 60,
+    Filters.GREEN: 60,
+    Filters.BLUE: 60,
+    Filters.SII: 180,
+    Filters.HA: 180,
+    Filters.OIII: 180,
+    Filters.NONE: 2
 }
 EXPOSURE = {
-    Telescope.ORION: EXPOSURE_ORION,
-    Telescope.TOWA: EXPOSURE_TOWA,
-    Telescope.C6_HYPER: EXPOSURE_C6_HYPER
+    Telescope.TOWA: EXPOSURE_TOWA
 }
 
 # Platesolving exposure time
-PLATE_EXPOSURE_ORION = {
-    Filters.UVIR: 4,
-    Filters.LENHANCE: 4
-}
 PLATE_EXPOSURE_TOWA = {
-    Filters.UVIR: 12,
-    Filters.LPRO: 12
-}
-PLATE_EXPOSURE_C6_HYPER = {
-    Filters.UVIR: 1,
-    Filters.LPRO: 1,
-    Filters.LENHANCE: 2,
-    Filters.D1: 4,
-    Filters.D2: 4
+    Filters.LUMINANCE: 2,
+    Filters.RED: 2,
+    Filters.GREEN: 2,
+    Filters.BLUE: 2,
+    Filters.SII: 2,
+    Filters.HA: 2,
+    Filters.OIII: 2,
+    Filters.NONE: 2
 }
 PLATE_EXPOSURE = {
-    Telescope.ORION: PLATE_EXPOSURE_ORION,
-    Telescope.TOWA: PLATE_EXPOSURE_TOWA,
-    Telescope.C6_HYPER: PLATE_EXPOSURE_C6_HYPER
+    Telescope.TOWA: PLATE_EXPOSURE_TOWA
 }
 
 # Time divider for frame calculation
-TIMEDIV_ORION = {
-    Filters.UVIR: 35.08,
-    Filters.LENHANCE: 188
-}
 TIMEDIV_TOWA = {
-    Filters.UVIR: 70.16,
-    Filters.LPRO: 181.73
-}
-TIMEDIV_C6_HYPER = {
-    Filters.UVIR: 35.08,
-    Filters.LPRO: 35.08,
-    Filters.LENHANCE: 133,
-    Filters.D1: 247,
-    Filters.D2: 247
+    Filters.LUMINANCE: 70.16,
+    Filters.RED: 70.16,
+    Filters.GREEN: 70.16,
+    Filters.BLUE: 70.16,
+    Filters.SII: 190.82,
+    Filters.HA: 190.82,
+    Filters.OIII: 190.82,
+    Filters.NONE: 70.16
 }
 TIMEDIV = {
-    Telescope.ORION: TIMEDIV_ORION,
-    Telescope.TOWA: TIMEDIV_TOWA,
-    Telescope.C6_HYPER: TIMEDIV_C6_HYPER
+    Telescope.TOWA: TIMEDIV_TOWA
 }
 
 # Frames per dither
-DITHER_ORION = {
-    Filters.UVIR: 12,
-    Filters.LENHANCE: 6
-}
 DITHER_TOWA = {
-    Filters.UVIR: 10,
-    Filters.LPRO: 6
-}
-DITHER_C6_HYPER = {
-    Filters.UVIR: 12,
-    Filters.LPRO: 12,
-    Filters.LENHANCE: 8,
-    Filters.D1: 3,
-    Filters.D2: 3
+    Filters.LUMINANCE: 10,
+    Filters.RED: 10,
+    Filters.GREEN: 10,
+    Filters.BLUE: 10,
+    Filters.SII: 3,
+    Filters.HA: 3,
+    Filters.OIII: 3,
+    Filters.NONE: 10
 }
 DITHER = {
-    Telescope.ORION: DITHER_ORION,
-    Telescope.TOWA: DITHER_TOWA,
-    Telescope.C6_HYPER: DITHER_C6_HYPER
+    Telescope.TOWA: DITHER_TOWA
 }
 
 class Session:
@@ -149,11 +120,10 @@ class Session:
         self.temperature = input("Set cooler temp C (100 to disable)\n")
         
     def set_telescope(self) -> None:
-        scope_in = input("Select your telescope:\n[1] = Orion 130ST\n[2] = Towa 339\n[3] = C6 (Hyperstar)\n")
-        self.telescope_type = Telescope(int(scope_in))
+        self.telescope_type = Telescope(2)
         
     def set_filter(self) -> None:
-        filter_in = input("Select your filter::\n[1] = UV/IR\n[2] = L-Enhance\n[3] = L-Pro\n[4] = D1\n[5] = D2\n")
+        filter_in = input("Select your filter:\n[1] = Luminance\n[2] = Red\n[3] = Green\n[4] = Blue\n[5] = SII\n[6] = Ha\n[7] = OIII\n[8] = None\n")
         self.filter_type = Filters(int(filter_in))
     
     def calc_capture_vals(self) -> None:
@@ -163,18 +133,11 @@ class Session:
         self.dither = DITHER[self.telescope_type][self.filter_type]
         
     def preset(self) -> None:
-        preset_in = int(input("Select your preset:\n[1] = Orion OSC\n[2] = Orion NB\n[3] = C6 (Hyperstar) OSC\n[4] = C6 (Hyperstar) NB\n"))
-        if preset_in == 1:
-            preset_val = Presets.ORION_OSC
-        elif preset_in == 2:
-            preset_val = Presets.ORION_NB
-        elif preset_in == 3:
-            preset_val = Presets.C6H_OSC
-        elif preset_in == 4:
-            preset_val = Presets.C6H_NB
+        if self.filter_type in [Filters.RED, Filters.GREEN, Filters.BLUE]:
+            preset_val = Presets.TOWA_RGB
         else:
-            raise ValueError("Invalid selection.")
-        self.outfile.write(f"    LOAD PROFILE \"{preset_val.value}\"\n")
+            preset_val = Presets.TOWA_NB
+        self.outfile.write(f"    LOAD PROFILE {preset_val.value}\n")
 
     def create_target(self) -> None:
         #Setup
@@ -183,10 +146,10 @@ class Session:
 
         #Set cooler temperature
         if int(self.temperature) != 100:
-            self.outfile.write("    COOL DOWN TO " + self.temperature + " RATE 8 TOLERANCE 1\n")
+            self.outfile.write("    COOL DOWN TO " + self.temperature + " RATE 25 TOLERANCE 1\n")
 
         #Configure image formatting
-        self.outfile.write("    SET COLOUR SPACE TO RAW16\n")
+        self.outfile.write("    SET COLOUR SPACE TO MONO16\n")
         self.outfile.write("    SET OUTPUT FORMAT TO \"FITS files (*.fits)\"\n")
         
         self.preset()
@@ -208,16 +171,28 @@ class Session:
         self.outfile.write("    TARGETNAME \"" + target_name + "\"\n")
         self.outfile.write("    SET EXPOSURE TO " + str(self.exposure_time) + "\n")
 
-        #Platesolve and correct position
+        #Platesolve and correct position twice
+        self.outfile.write("    WHEEL MOVE TO 1\n")
+        self.outfile.write("    DELAY 20\n")
         self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
-        self.outfile.write("        SET EXPOSURE TO " + str(self.plate_exposure_time) + "\n")
+        self.outfile.write("        SET EXPOSURE TO 2\n")
         self.outfile.write("        SET GAIN TO 100\n")
         self.outfile.write("        MOUNT SOLVEANDSYNC\n")
         self.outfile.write("    END PRESERVE\n")
         self.outfile.write("    DELAY 10\n")
+        self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
+        self.outfile.write("        SET EXPOSURE TO 2\n")
+        self.outfile.write("        SET GAIN TO 100\n")
+        self.outfile.write("        MOUNT SOLVEANDSYNC\n")
+        self.outfile.write("    END PRESERVE\n")
+        self.outfile.write("    DELAY 10\n")
+        self.outfile.write("    WHEEL MOVE TO " + str(self.filter_type.value) + "\n")
+        self.outfile.write("    DELAY 20\n")
 
         #Set guiding and frame quantity
         self.outfile.write("    GUIDING CONNECT ABORT False\n")
+        self.outfile.write("    GUIDING STOP\n")
+        self.outfile.write("    DELAY 5\n")
         self.outfile.write("    GUIDING START\n")
         self.outfile.write("    DELAY 20\n")
         self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
@@ -239,13 +214,14 @@ class Session:
         self.outfile.write("    MOUNT PARK\n")
         if int(self.temperature) != 100:
             self.outfile.write("    SET COOLER OFF\n")
+        self.outfile.write("    WHEEL MOVE TO 1\n")
         self.outfile.write("END SEQUENCE\n")
         self.outfile.close()
 
 def main() -> None:
     if len(sys.argv) != 1:
         print('Formatting error!')
-        print('Example: sharp_sequence_parser.py')
+        print('Example: ssp_towa.py')
         quit()
 
     #Prompt for filename and create file
@@ -254,7 +230,7 @@ def main() -> None:
     filename += ".scs"
     fileout = open(filename, "w+")
 
-    session = Session(fileout, 100, Filters.UVIR, Telescope.ORION, 0, 0, 0, 0)
+    session = Session(fileout, 100, Filters.LUMINANCE, Telescope.TOWA, 0, 0, 0, 0)
 
     session.start_time()
     
@@ -272,6 +248,8 @@ def main() -> None:
 
     #Insert additional targets
     while input("Enter additional target? (y/n)") == 'y':
+        session.set_filter()
+        session.calc_capture_vals()
         session.create_target()
 
     session.shutdown()
