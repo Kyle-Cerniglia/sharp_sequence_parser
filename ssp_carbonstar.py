@@ -6,7 +6,7 @@ from enum import Enum
 from enum import auto
 
 class Telescope(Enum):
-    TOWA = 2
+    CARBON = 2
     
 class Filters(Enum):
     LUMINANCE = 1
@@ -19,26 +19,26 @@ class Filters(Enum):
     NONE = 8
 
 class Presets(Enum):
-    TOWA_RGB = "MC8_RGB"
-    TOWA_NB = "MC8_NB"
+    CARBON_LRGB = "MC8_RGB"
+    CARBON_NB = "MC8_NB"
 
 # Exposure time
-EXPOSURE_TOWA = {
-    Filters.LUMINANCE: 2,
-    Filters.RED: 60,
-    Filters.GREEN: 60,
-    Filters.BLUE: 60,
+EXPOSURE_CARBON = {
+    Filters.LUMINANCE: 30,
+    Filters.RED: 30,
+    Filters.GREEN: 30,
+    Filters.BLUE: 30,
     Filters.SII: 180,
     Filters.HA: 180,
     Filters.OIII: 180,
     Filters.NONE: 2
 }
 EXPOSURE = {
-    Telescope.TOWA: EXPOSURE_TOWA
+    Telescope.CARBON: EXPOSURE_CARBON
 }
 
 # Platesolving exposure time
-PLATE_EXPOSURE_TOWA = {
+PLATE_EXPOSURE_CARBON = {
     Filters.LUMINANCE: 2,
     Filters.RED: 2,
     Filters.GREEN: 2,
@@ -49,11 +49,11 @@ PLATE_EXPOSURE_TOWA = {
     Filters.NONE: 2
 }
 PLATE_EXPOSURE = {
-    Telescope.TOWA: PLATE_EXPOSURE_TOWA
+    Telescope.CARBON: PLATE_EXPOSURE_CARBON
 }
 
 # Time divider for frame calculation
-TIMEDIV_TOWA = {
+TIMEDIV_CARBON = {
     Filters.LUMINANCE: 70.16,
     Filters.RED: 70.16,
     Filters.GREEN: 70.16,
@@ -64,11 +64,11 @@ TIMEDIV_TOWA = {
     Filters.NONE: 70.16
 }
 TIMEDIV = {
-    Telescope.TOWA: TIMEDIV_TOWA
+    Telescope.CARBON: TIMEDIV_CARBON
 }
 
 # Frames per dither
-DITHER_TOWA = {
+DITHER_CARBON = {
     Filters.LUMINANCE: 10,
     Filters.RED: 10,
     Filters.GREEN: 10,
@@ -79,7 +79,7 @@ DITHER_TOWA = {
     Filters.NONE: 10
 }
 DITHER = {
-    Telescope.TOWA: DITHER_TOWA
+    Telescope.CARBON: DITHER_CARBON
 }
 
 class Session:
@@ -133,10 +133,10 @@ class Session:
         self.dither = DITHER[self.telescope_type][self.filter_type]
         
     def preset(self) -> None:
-        if self.filter_type in [Filters.RED, Filters.GREEN, Filters.BLUE]:
-            preset_val = Presets.TOWA_RGB
+        if self.filter_type in [Filters.LUMINANCE, Filters.RED, Filters.GREEN, Filters.BLUE]:
+            preset_val = Presets.CARBON_LRGB
         else:
-            preset_val = Presets.TOWA_NB
+            preset_val = Presets.CARBON_NB
         self.outfile.write(f"    LOAD PROFILE {preset_val.value}\n")
 
     def create_target(self) -> None:
@@ -230,7 +230,7 @@ def main() -> None:
     filename += ".scs"
     fileout = open(filename, "w+")
 
-    session = Session(fileout, 100, Filters.LUMINANCE, Telescope.TOWA, 0, 0, 0, 0)
+    session = Session(fileout, 100, Filters.LUMINANCE, Telescope.CARBON, 0, 0, 0, 0)
 
     session.start_time()
     
