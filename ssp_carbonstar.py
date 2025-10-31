@@ -20,7 +20,7 @@ class Filters(Enum):
     NONE = 8
 
 class Presets(Enum):
-    CARBON_LRGB = "MC8_RGB"
+    CARBON_LRGB = "MC8_LRGB"
     CARBON_NB = "MC8_NB"
 
 # Exposure time
