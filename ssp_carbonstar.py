@@ -55,14 +55,14 @@ PLATE_EXPOSURE = {
 
 # Time divider for frame calculation
 TIMEDIV_CARBON = {
-    Filters.LUMINANCE: 35.08,
-    Filters.RED: 35.08,
-    Filters.GREEN: 35.08,
-    Filters.BLUE: 35.08,
+    Filters.LUMINANCE: 33.44,
+    Filters.RED: 33.44,
+    Filters.GREEN: 33.44,
+    Filters.BLUE: 33.44,
     Filters.SII: 190.82,
     Filters.HA: 190.82,
     Filters.OIII: 190.82,
-    Filters.NONE: 35.08
+    Filters.NONE: 33.44
 }
 TIMEDIV = {
     Telescope.CARBON: TIMEDIV_CARBON
