@@ -144,10 +144,6 @@ class Session:
         self.outfile.write("    DELAY 1\n")
         self.outfile.write("    STILL MODE\n")
 
-        #Set cooler temperature
-        if int(self.temperature) != 100:
-            self.outfile.write("    COOL DOWN TO " + self.temperature + " RATE 25 TOLERANCE 1\n")
-
         #Configure image formatting
         self.outfile.write("    SET COLOUR SPACE TO MONO16\n")
         self.outfile.write("    SET OUTPUT FORMAT TO \"FITS files (*.fits)\"\n")
@@ -169,7 +165,6 @@ class Session:
         #Set target name
         target_name = input("Enter target name\n")
         self.outfile.write("    TARGETNAME \"" + target_name + "\"\n")
-        self.outfile.write("    SET EXPOSURE TO " + str(self.exposure_time) + "\n")
 
         #Platesolve and correct position twice
         self.outfile.write("    WHEEL MOVE TO 1\n")
@@ -180,6 +175,8 @@ class Session:
         self.outfile.write("        MOUNT SOLVEANDSYNC\n")
         self.outfile.write("    END PRESERVE\n")
         self.outfile.write("    DELAY 10\n")
+        self.outfile.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + dec_d + " " + dec_m + " " + dec_s + "\"\n")
+        self.outfile.write("    DELAY 20\n")
         self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
         self.outfile.write("        SET EXPOSURE TO 2\n")
         self.outfile.write("        SET GAIN TO 100\n")
@@ -189,12 +186,21 @@ class Session:
         self.outfile.write("    WHEEL MOVE TO " + str(self.filter_type.value) + "\n")
         self.outfile.write("    DELAY 20\n")
 
-        #Set guiding and frame quantity
+        #Set guiding
         self.outfile.write("    GUIDING CONNECT ABORT False\n")
         self.outfile.write("    GUIDING STOP\n")
         self.outfile.write("    DELAY 5\n")
         self.outfile.write("    GUIDING START\n")
         self.outfile.write("    DELAY 20\n")
+        
+        #Set cooler temperature
+        if int(self.temperature) != 100:
+            self.outfile.write("    COOL DOWN TO " + self.temperature + " RATE 25 TOLERANCE 1\n")
+        
+        #Set exposure
+        self.outfile.write("    SET EXPOSURE TO " + str(self.exposure_time) + "\n")
+        
+        #Set frame capture
         self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
         self.outfile.write("        FRAMETYPE Light\n")
         self.outfile.write("        GUIDING DITHER EVERY " + str(self.dither) + " FRAMES\n")
