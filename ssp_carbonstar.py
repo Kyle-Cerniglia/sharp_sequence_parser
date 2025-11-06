@@ -174,7 +174,7 @@ class Session:
 
         #Platesolve and correct position twice
         self.outfile.write("    WHEEL MOVE TO 1\n")
-        self.outfile.write("    DELAY 20\n")
+        self.outfile.write("    DELAY 10\n")
         self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
         self.outfile.write("        SET EXPOSURE TO 2\n")
         self.outfile.write("        SET GAIN TO 100\n")
@@ -188,14 +188,14 @@ class Session:
         self.outfile.write("    END PRESERVE\n")
         self.outfile.write("    DELAY 10\n")
         self.outfile.write("    WHEEL MOVE TO " + str(self.filter_type.value) + "\n")
-        self.outfile.write("    DELAY 20\n")
+        self.outfile.write("    DELAY 10\n")
 
         #Set guiding and frame quantity
         self.outfile.write("    GUIDING CONNECT ABORT False\n")
         self.outfile.write("    GUIDING STOP\n")
         self.outfile.write("    DELAY 5\n")
         self.outfile.write("    GUIDING START\n")
-        self.outfile.write("    DELAY 20\n")
+        self.outfile.write("    DELAY 10\n")
         self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
         self.outfile.write("        FRAMETYPE Light\n")
         self.outfile.write("        GUIDING DITHER EVERY " + str(self.dither) + " FRAMES\n")
