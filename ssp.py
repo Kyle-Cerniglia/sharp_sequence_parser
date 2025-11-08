@@ -26,6 +26,7 @@ class Presets(Enum):
 # Exposure time
 EXPOSURE_ORION = {
     Filters.UVIR: 30,
+    Filters.LPRO: 30,
     Filters.LENHANCE: 180
 }
 EXPOSURE_TOWA = {
@@ -48,6 +49,7 @@ EXPOSURE = {
 # Platesolving exposure time
 PLATE_EXPOSURE_ORION = {
     Filters.UVIR: 4,
+    Filters.LPRO: 4,
     Filters.LENHANCE: 4
 }
 PLATE_EXPOSURE_TOWA = {
@@ -70,6 +72,7 @@ PLATE_EXPOSURE = {
 # Time divider for frame calculation
 TIMEDIV_ORION = {
     Filters.UVIR: 35.08,
+    Filters.LPRO: 35.08,
     Filters.LENHANCE: 188
 }
 TIMEDIV_TOWA = {
@@ -92,6 +95,7 @@ TIMEDIV = {
 # Frames per dither
 DITHER_ORION = {
     Filters.UVIR: 12,
+    Filters.LPRO: 12,
     Filters.LENHANCE: 6
 }
 DITHER_TOWA = {
