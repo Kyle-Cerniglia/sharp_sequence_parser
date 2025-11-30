@@ -59,9 +59,9 @@ TIMEDIV_CARBON = {
     Filters.RED: 33.44,
     Filters.GREEN: 33.44,
     Filters.BLUE: 33.44,
-    Filters.SII: 189.52,
-    Filters.HA: 189.52,
-    Filters.OIII: 189.52,
+    Filters.SII: 195.26,
+    Filters.HA: 195.26,
+    Filters.OIII: 195.26,
     Filters.NONE: 33.44
 }
 TIMEDIV = {
