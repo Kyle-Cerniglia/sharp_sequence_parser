@@ -160,15 +160,30 @@ class Session:
         dec_d = input("Enter J2000 coordinates (DEC d)\n")
         dec_m = input("Enter J2000 coordinates (DEC m)\n")
         dec_s = input("Enter J2000 coordinates (DEC s)\n")
-        self.outfile.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + dec_d + " " + dec_m + " " + dec_s + "\"\n")
-        self.outfile.write("    DELAY 10\n")
 
         #Set target name
         target_name = input("Enter target name\n")
         self.outfile.write("    TARGETNAME \"" + target_name + "\"\n")
+        
+        # Slew and plate solve to a position 5 degrees off of target (Towards the equator) to get a rough platesolve
+        dec_d_offset = int(dec_d)
+        if(dec_d_offset > 0):
+            dec_d_offset = dec_d_offset - 5
+        else:
+            dec_d_offset = dec_d_offset + 5
+        self.outfile.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + str(dec_d_offset) + " " + dec_m + " " + dec_s + "\"\n")
+        self.outfile.write("    DELAY 10\n")
+        self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
+        self.outfile.write("        SET EXPOSURE TO 2\n")
+        self.outfile.write("        SET GAIN TO 100\n")
+        self.outfile.write("        MOUNT SOLVEANDSYNC\n")
+        self.outfile.write("    END PRESERVE\n")
+        self.outfile.write("    DELAY 10\n")
 
         #Platesolve and correct position twice
         self.outfile.write("    WHEEL MOVE TO 1\n")
+        self.outfile.write("    DELAY 10\n")
+        self.outfile.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + dec_d + " " + dec_m + " " + dec_s + "\"\n")
         self.outfile.write("    DELAY 10\n")
         self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
         self.outfile.write("        SET EXPOSURE TO 2\n")
