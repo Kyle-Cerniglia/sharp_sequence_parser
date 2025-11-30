@@ -18,6 +18,7 @@ class Filters(Enum):
     HA = 6
     OIII = 7
     NONE = 8
+    RGB = 9
 
 class Presets(Enum):
     CARBON_LRGB = "MC8_LRGB"
@@ -32,7 +33,8 @@ EXPOSURE_CARBON = {
     Filters.SII: 180,
     Filters.HA: 180,
     Filters.OIII: 180,
-    Filters.NONE: 2
+    Filters.NONE: 2,
+    Filters.RGB: 30
 }
 EXPOSURE = {
     Telescope.CARBON: EXPOSURE_CARBON
@@ -47,7 +49,8 @@ PLATE_EXPOSURE_CARBON = {
     Filters.SII: 2,
     Filters.HA: 2,
     Filters.OIII: 2,
-    Filters.NONE: 2
+    Filters.NONE: 2,
+    Filters.RGB: 2
 }
 PLATE_EXPOSURE = {
     Telescope.CARBON: PLATE_EXPOSURE_CARBON
@@ -62,7 +65,8 @@ TIMEDIV_CARBON = {
     Filters.SII: 195.26,
     Filters.HA: 195.26,
     Filters.OIII: 195.26,
-    Filters.NONE: 33.44
+    Filters.NONE: 33.44,
+    Filters.RGB: 33.44
 }
 TIMEDIV = {
     Telescope.CARBON: TIMEDIV_CARBON
@@ -77,11 +81,14 @@ DITHER_CARBON = {
     Filters.SII: 3,
     Filters.HA: 3,
     Filters.OIII: 3,
-    Filters.NONE: 20
+    Filters.NONE: 20,
+    Filters.RGB: 20
 }
 DITHER = {
     Telescope.CARBON: DITHER_CARBON
 }
+
+rgb_flag = False
 
 class Session:
     def __init__(
@@ -124,8 +131,13 @@ class Session:
         self.telescope_type = Telescope(2)
         
     def set_filter(self) -> None:
-        filter_in = input("Select your filter:\n[1] = Luminance\n[2] = Red\n[3] = Green\n[4] = Blue\n[5] = SII\n[6] = Ha\n[7] = OIII\n[8] = None\n")
+        global rgb_flag
+        filter_in = input("Select your filter:\n[1] = Luminance\n[2] = Red\n[3] = Green\n[4] = Blue\n[5] = SII\n[6] = Ha\n[7] = OIII\n[8] = None\n[9] = RGB\n")
         self.filter_type = Filters(int(filter_in))
+        if self.filter_type in [Filters.RGB]:
+            rgb_flag = True
+        else:
+            rgb_flag = False
     
     def calc_capture_vals(self) -> None:
         self.exposure_time = EXPOSURE[self.telescope_type][self.filter_type]
@@ -165,7 +177,7 @@ class Session:
         target_name = input("Enter target name\n")
         self.outfile.write("    TARGETNAME \"" + target_name + "\"\n")
         
-        # Slew and plate solve to a position 5 degrees off of target (Towards the equator) to get a rough platesolve
+        #Slew and plate solve to a position 5 degrees off of target (Towards the equator) to get a rough platesolve
         dec_d_offset = int(dec_d)
         if(dec_d_offset > 0):
             dec_d_offset = dec_d_offset - 5
@@ -230,6 +242,124 @@ class Session:
         self.outfile.write("    END PRESERVE\n")
         self.outfile.write("    GUIDING STOP\n")
         self.outfile.write("    GUIDING DISCONNECT\n\n")
+    
+    def create_rgb_target(self) -> None:
+        #Setup
+        self.outfile.write("    DELAY 1\n")
+        self.outfile.write("    STILL MODE\n")
+
+        #Configure image formatting
+        self.outfile.write("    SET COLOUR SPACE TO MONO16\n")
+        self.outfile.write("    SET OUTPUT FORMAT TO \"FITS files (*.fits)\"\n")
+        
+        self.preset()
+            
+        self.outfile.write("    MOUNT CONNECT\n")
+
+        #Configure target
+        ra_h = input("Enter J2000 coordinates (RA h)\n")
+        ra_m = input("Enter J2000 coordinates (RA m)\n")
+        ra_s = input("Enter J2000 coordinates (RA s)\n")
+        dec_d = input("Enter J2000 coordinates (DEC d)\n")
+        dec_m = input("Enter J2000 coordinates (DEC m)\n")
+        dec_s = input("Enter J2000 coordinates (DEC s)\n")
+        
+        # Image RED
+
+        #Set target name
+        target_name = input("Enter RGB target name\n")
+        self.outfile.write("    TARGETNAME \"" + target_name + "_r\"\n")
+        
+        #Slew and plate solve to a position 5 degrees off of target (Towards the equator) to get a rough platesolve
+        dec_d_offset = int(dec_d)
+        if(dec_d_offset > 0):
+            dec_d_offset = dec_d_offset - 5
+        else:
+            dec_d_offset = dec_d_offset + 5
+        self.outfile.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + str(dec_d_offset) + " " + dec_m + " " + dec_s + "\"\n")
+        self.outfile.write("    DELAY 10\n")
+        self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
+        self.outfile.write("        SET EXPOSURE TO 2\n")
+        self.outfile.write("        SET GAIN TO 100\n")
+        self.outfile.write("        MOUNT SOLVEANDSYNC\n")
+        self.outfile.write("    END PRESERVE\n")
+        self.outfile.write("    DELAY 10\n")
+
+        #Platesolve and correct position twice
+        self.outfile.write("    WHEEL MOVE TO 1\n")
+        self.outfile.write("    DELAY 10\n")
+        self.outfile.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + dec_d + " " + dec_m + " " + dec_s + "\"\n")
+        self.outfile.write("    DELAY 10\n")
+        self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
+        self.outfile.write("        SET EXPOSURE TO 2\n")
+        self.outfile.write("        SET GAIN TO 100\n")
+        self.outfile.write("        MOUNT SOLVEANDSYNC\n")
+        self.outfile.write("    END PRESERVE\n")
+        self.outfile.write("    DELAY 10\n")
+        self.outfile.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + dec_d + " " + dec_m + " " + dec_s + "\"\n")
+        self.outfile.write("    DELAY 10\n")
+        self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
+        self.outfile.write("        SET EXPOSURE TO 2\n")
+        self.outfile.write("        SET GAIN TO 100\n")
+        self.outfile.write("        MOUNT SOLVEANDSYNC\n")
+        self.outfile.write("    END PRESERVE\n")
+        self.outfile.write("    DELAY 10\n")
+        self.outfile.write("    WHEEL MOVE TO " + str(Filters.RED.value) + "\n")
+        self.outfile.write("    DELAY 10\n")
+
+        #Set guiding
+        self.outfile.write("    GUIDING CONNECT ABORT False\n")
+        self.outfile.write("    GUIDING STOP\n")
+        self.outfile.write("    DELAY 5\n")
+        self.outfile.write("    GUIDING START\n")
+        self.outfile.write("    DELAY 10\n")
+        
+        #Set cooler temperature
+        if int(self.temperature) != 100:
+            self.outfile.write("    COOL DOWN TO " + self.temperature + " RATE 25 TOLERANCE 1\n")
+            
+        #Set exposure
+        self.outfile.write("    SET EXPOSURE TO " + str(self.exposure_time) + "\n")
+        
+        #Set frame capture
+        self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
+        self.outfile.write("        FRAMETYPE Light\n")
+        self.outfile.write("        GUIDING DITHER EVERY " + str(self.dither) + " FRAMES\n")
+        frame_duration = input("Enter number of hours to capture data\n")
+        frame_qty = (float(frame_duration) * 3600) / self.timediv
+        frame_qty = frame_qty / 3
+        frame_qty = math.floor(frame_qty)
+            
+        frame_qty_s = str(frame_qty)
+        self.outfile.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
+        self.outfile.write("        GUIDING DITHER EVERY STOP\n")
+        self.outfile.write("    END PRESERVE\n")
+        
+        #Image GREEN
+        self.outfile.write("    TARGETNAME \"" + target_name + "_g\"\n")
+        self.outfile.write("    WHEEL MOVE TO " + str(Filters.GREEN.value) + "\n")
+        self.outfile.write("    DELAY 10\n")
+        self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
+        self.outfile.write("        FRAMETYPE Light\n")
+        self.outfile.write("        GUIDING DITHER EVERY " + str(self.dither) + " FRAMES\n")
+        self.outfile.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
+        self.outfile.write("        GUIDING DITHER EVERY STOP\n")
+        self.outfile.write("    END PRESERVE\n")
+        
+        #Image BLUE
+        self.outfile.write("    TARGETNAME \"" + target_name + "_b\"\n")
+        self.outfile.write("    WHEEL MOVE TO " + str(Filters.BLUE.value) + "\n")
+        self.outfile.write("    DELAY 10\n")
+        self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
+        self.outfile.write("        FRAMETYPE Light\n")
+        self.outfile.write("        GUIDING DITHER EVERY " + str(self.dither) + " FRAMES\n")
+        self.outfile.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
+        self.outfile.write("        GUIDING DITHER EVERY STOP\n")
+        self.outfile.write("    END PRESERVE\n")
+        
+        #Finish target
+        self.outfile.write("    GUIDING STOP\n")
+        self.outfile.write("    GUIDING DISCONNECT\n\n")
         
     def shutdown(self) -> None:
         #Final Shutdown
@@ -266,13 +396,19 @@ def main() -> None:
     
     session.unpark()
 
-    session.create_target()
+    if (rgb_flag == True):
+        session.create_rgb_target()
+    else:
+        session.create_target()
 
     #Insert additional targets
     while input("Enter additional target? (y/n)") == 'y':
         session.set_filter()
         session.calc_capture_vals()
-        session.create_target()
+        if (rgb_flag == True):
+            session.create_rgb_target()
+        else:
+            session.create_target()
 
     session.shutdown()
 
