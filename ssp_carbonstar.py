@@ -99,6 +99,8 @@ dec_d = ""
 dec_m = ""
 dec_s = ""
 master_catalog = Path("catalogs") / "master.csv"
+catalog_search = ""
+catalog_used = False
 
 def coords_direct() -> None:
     global ra_h
@@ -115,6 +117,8 @@ def coords_direct() -> None:
     dec_m = input("Enter J2000 coordinates (DEC m)\n")
     dec_s = input("Enter J2000 coordinates (DEC s)\n")
     
+    catalog_used = False
+    
 def coords_catalog() -> None:
     global ra_h
     global ra_m
@@ -122,8 +126,10 @@ def coords_catalog() -> None:
     global dec_d
     global dec_m
     global dec_s
+    global catalog_search
+    global catalog_used
     
-    search_value = input("Enter catalog name (Ex. m101):\n")
+    catalog_search = input("Enter catalog name (Ex. m101):\n")
     
     try:
         with master_catalog.open(mode="r", encoding="utf-8", newline="") as f:
@@ -134,13 +140,14 @@ def coords_catalog() -> None:
                 if len(row) < 7:
                     continue
 
-                if row[0] == search_value:
+                if row[0] == catalog_search:
                     ra_h = row[1]
                     ra_m = row[2]
                     ra_s = row[3]
                     dec_d = row[4]
                     dec_m = row[5]
                     dec_s = row[6]
+                    catalog_used = True
                     return
             #If you got here, then the item wasn't found
             print("Catalog object not found, please enter in coordinates manually\n")
@@ -232,8 +239,28 @@ class Session:
             coords_direct()
 
         #Set target name
-        target_name = input("Enter target name\n")
-        self.outfile.write("    TARGETNAME \"" + target_name + "\"\n")
+        if(catalog_used):
+            target_name = catalog_search
+        else:
+            target_name = input("Enter target name\n")
+        
+        if self.filter_type in [Filters.LUMINANCE]:
+            self.outfile.write("    TARGETNAME \"" + target_name + "_l\"\n")
+        elif self.filter_type in [Filters.RED]:
+            self.outfile.write("    TARGETNAME \"" + target_name + "_r\"\n")
+        elif self.filter_type in [Filters.GREEN]:
+            self.outfile.write("    TARGETNAME \"" + target_name + "_g\"\n")
+        elif self.filter_type in [Filters.BLUE]:
+            self.outfile.write("    TARGETNAME \"" + target_name + "_b\"\n")
+        elif self.filter_type in [Filters.SII]:
+            self.outfile.write("    TARGETNAME \"" + target_name + "_s\"\n")
+        elif self.filter_type in [Filters.HA]:
+            self.outfile.write("    TARGETNAME \"" + target_name + "_h\"\n")
+        elif self.filter_type in [Filters.OIII]:
+            self.outfile.write("    TARGETNAME \"" + target_name + "_o\"\n")
+        else:
+            self.outfile.write("    TARGETNAME \"" + target_name + "\"\n")
+        
         
         #Slew and plate solve to a position 5 degrees off of target (Towards the equator) to get a rough platesolve
         dec_d_offset = int(dec_d)
@@ -323,7 +350,11 @@ class Session:
         # Image RED
 
         #Set target name
-        target_name = input("Enter RGB target name\n")
+        if(catalog_used):
+            target_name = catalog_search
+        else:
+            target_name = input("Enter RGB target name\n")
+        
         self.outfile.write("    TARGETNAME \"" + target_name + "_r\"\n")
         
         #Slew and plate solve to a position 5 degrees off of target (Towards the equator) to get a rough platesolve
