@@ -5,6 +5,9 @@ import sys
 import math
 from enum import Enum
 from enum import auto
+import csv
+from pathlib import Path
+from typing import Optional
 
 class Telescope(Enum):
     CARBON = 2
@@ -89,6 +92,63 @@ DITHER = {
 }
 
 rgb_flag = False
+ra_h = ""
+ra_m = ""
+ra_s = ""
+dec_d = ""
+dec_m = ""
+dec_s = ""
+master_catalog = Path("catalogs") / "master.csv"
+
+def coords_direct() -> None:
+    global ra_h
+    global ra_m
+    global ra_s
+    global dec_d
+    global dec_m
+    global dec_s
+    
+    ra_h = input("Enter J2000 coordinates (RA h)\n")
+    ra_m = input("Enter J2000 coordinates (RA m)\n")
+    ra_s = input("Enter J2000 coordinates (RA s)\n")
+    dec_d = input("Enter J2000 coordinates (DEC d)\n")
+    dec_m = input("Enter J2000 coordinates (DEC m)\n")
+    dec_s = input("Enter J2000 coordinates (DEC s)\n")
+    
+def coords_catalog() -> None:
+    global ra_h
+    global ra_m
+    global ra_s
+    global dec_d
+    global dec_m
+    global dec_s
+    
+    search_value = input("Enter catalog name (Ex. m101):\n")
+    
+    try:
+        with master_catalog.open(mode="r", encoding="utf-8", newline="") as f:
+            reader = csv.reader(f)
+
+            for row in reader:
+                # Skip empty or short rows
+                if len(row) < 7:
+                    continue
+
+                if row[0] == search_value:
+                    ra_h = row[1]
+                    ra_m = row[2]
+                    ra_s = row[3]
+                    dec_d = row[4]
+                    dec_m = row[5]
+                    dec_s = row[6]
+                    return
+            #If you got here, then the item wasn't found
+            print("Catalog object not found, please enter in coordinates manually\n")
+            coords_direct()
+
+    except FileNotFoundError:
+        print("Catalog file not found, please enter in coordinates manually\n")
+        coords_direct()
 
 class Session:
     def __init__(
@@ -150,7 +210,7 @@ class Session:
             preset_val = Presets.CARBON_LRGB
         else:
             preset_val = Presets.CARBON_NB
-        self.outfile.write(f"    LOAD PROFILE {preset_val.value}\n")
+        self.outfile.write(f"    LOAD PROFILE {preset_val.value}\n")        
 
     def create_target(self) -> None:
         #Setup
@@ -166,12 +226,10 @@ class Session:
         self.outfile.write("    MOUNT CONNECT\n")
 
         #Configure target
-        ra_h = input("Enter J2000 coordinates (RA h)\n")
-        ra_m = input("Enter J2000 coordinates (RA m)\n")
-        ra_s = input("Enter J2000 coordinates (RA s)\n")
-        dec_d = input("Enter J2000 coordinates (DEC d)\n")
-        dec_m = input("Enter J2000 coordinates (DEC m)\n")
-        dec_s = input("Enter J2000 coordinates (DEC s)\n")
+        if input("Lookup catalog target? (y/n)\n") == 'y':
+            coords_catalog()
+        else:
+            coords_direct()
 
         #Set target name
         target_name = input("Enter target name\n")
@@ -257,12 +315,10 @@ class Session:
         self.outfile.write("    MOUNT CONNECT\n")
 
         #Configure target
-        ra_h = input("Enter J2000 coordinates (RA h)\n")
-        ra_m = input("Enter J2000 coordinates (RA m)\n")
-        ra_s = input("Enter J2000 coordinates (RA s)\n")
-        dec_d = input("Enter J2000 coordinates (DEC d)\n")
-        dec_m = input("Enter J2000 coordinates (DEC m)\n")
-        dec_s = input("Enter J2000 coordinates (DEC s)\n")
+        if input("Lookup catalog target? (y/n)\n") == 'y':
+            coords_catalog()
+        else:
+            coords_direct()
         
         # Image RED
 
