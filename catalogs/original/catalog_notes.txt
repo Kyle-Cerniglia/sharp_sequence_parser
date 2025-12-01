@@ -6,3 +6,4 @@ Sharpless2: The Sharpless Observing Atlas (Reiner Vogel December 2009)
 LDN: astronomy-mall.com
 Abell Galaxy Clusters: astronomy-mall.com
 Barnard Dark Objects: astronomy-mall.com
+LBN: Vizier

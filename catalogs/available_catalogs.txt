@@ -1,6 +1,7 @@
 Abell Galaxy Clusters	(abell)
 Barnard Dark Objects	(b)
 Caldwell		(c)
-Lynds Dark Nebulae	(ldn)
+Lynd's Bright Nebulae	(lbn)
+Lynd's Dark Nebulae	(ldn)
 Messier			(m)
 Sharpless-2		(sh2)
