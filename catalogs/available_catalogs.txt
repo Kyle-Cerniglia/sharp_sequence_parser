@@ -1,4 +1,5 @@
 Abell Galaxy Clusters	(abell)
+Barnard Dark Objects	(b)
 Caldwell		(c)
 Lynds Dark Nebulae	(ldn)
 Messier			(m)
