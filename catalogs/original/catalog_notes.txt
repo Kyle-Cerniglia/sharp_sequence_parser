@@ -10,3 +10,4 @@ LBN: Vizier
 Perek-Kohoutek: Catalogue of Galactic Planetary Nabulae
 NGC: OpenNGC
 IC: OpenNGC
+PGC: Vizier
