@@ -109,6 +109,7 @@ def coords_direct() -> None:
     global dec_d
     global dec_m
     global dec_s
+    global catalog_used
     
     ra_h = input("Enter J2000 coordinates (RA h)\n")
     ra_m = input("Enter J2000 coordinates (RA m)\n")
