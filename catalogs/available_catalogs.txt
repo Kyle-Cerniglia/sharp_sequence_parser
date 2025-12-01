@@ -1,0 +1,5 @@
+Abell Galaxy Clusters	(abell)
+Caldwell		(c)
+Lynds Dark Nebulae	(ldn)
+Messier			(m)
+Sharpless-2		(sh2)

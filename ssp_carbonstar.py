@@ -99,6 +99,7 @@ dec_d = ""
 dec_m = ""
 dec_s = ""
 master_catalog = Path("catalogs") / "master.csv"
+list_catalog = Path("catalogs") / "available_catalogs.txt"
 catalog_search = ""
 catalog_used = False
 
@@ -130,7 +131,13 @@ def coords_catalog() -> None:
     global catalog_search
     global catalog_used
     
-    catalog_search = input("Enter catalog name (Ex. m101):\n")
+    #Show users the available catalogs
+    print("Available catalogs:\n")
+    with list_catalog.open("r", encoding="utf-8") as f:
+        contents = f.read()
+    print(contents)
+    
+    catalog_search = input("\nEnter catalog name (Ex. m101):\n")
     
     try:
         with master_catalog.open(mode="r", encoding="utf-8", newline="") as f:
