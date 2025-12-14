@@ -276,6 +276,8 @@ class Session:
             dec_d_offset = dec_d_offset - 5
         else:
             dec_d_offset = dec_d_offset + 5
+        self.outfile.write("    WHEEL MOVE TO 1\n")
+        self.outfile.write("    DELAY 10\n")
         self.outfile.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + str(dec_d_offset) + " " + dec_m + " " + dec_s + "\"\n")
         self.outfile.write("    DELAY 10\n")
         self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
@@ -371,6 +373,8 @@ class Session:
             dec_d_offset = dec_d_offset - 5
         else:
             dec_d_offset = dec_d_offset + 5
+        self.outfile.write("    WHEEL MOVE TO 1\n")
+        self.outfile.write("    DELAY 10\n")
         self.outfile.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + str(dec_d_offset) + " " + dec_m + " " + dec_s + "\"\n")
         self.outfile.write("    DELAY 10\n")
         self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
