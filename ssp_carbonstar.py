@@ -524,6 +524,8 @@ def main() -> None:
     
     session.set_telescope()
     
+    session.set_filter()
+    
     session.calc_capture_vals()
     
     session.unpark()
