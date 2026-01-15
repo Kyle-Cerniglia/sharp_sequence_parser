@@ -320,9 +320,9 @@ class Session:
         #Autofocus
         if(self.rough_focus != -1):
             self.outfile.write("    SET EXPOSURE TO 2\n")
-            self.outfile.write("    AUTOFOCUS FROM " + str(self.rough_focus - 50) + " TO " + str(self.rough_focus + 50) + " STEP COUNT 11\n")
-            #Remove 6 minutes from frame time for autofocus
-            frame_subtraction = 360 / self.exposure_time
+            self.outfile.write("    AUTOFOCUS FROM " + str(self.rough_focus - 100) + " TO " + str(self.rough_focus + 100) + " STEP COUNT 21\n")
+            #Remove 12 minutes from frame time for autofocus
+            frame_subtraction = 720 / self.exposure_time
         
         #Set filter
         self.outfile.write("    WHEEL MOVE TO " + str(self.filter_type.value) + "\n")
@@ -432,9 +432,9 @@ class Session:
         #Autofocus
         if(self.rough_focus != -1):
             self.outfile.write("    SET EXPOSURE TO 2\n")
-            self.outfile.write("    AUTOFOCUS FROM " + str(self.rough_focus - 50) + " TO " + str(self.rough_focus + 50) + " STEP COUNT 11\n")
-            #Remove 6 minutes from frame time for autofocus
-            frame_subtraction = 360 / self.exposure_time
+            self.outfile.write("    AUTOFOCUS FROM " + str(self.rough_focus - 100) + " TO " + str(self.rough_focus + 100) + " STEP COUNT 21\n")
+            #Remove 12 minutes from frame time for autofocus
+            frame_subtraction = 720 / self.exposure_time
         
         #Set filter
         self.outfile.write("    WHEEL MOVE TO " + str(Filters.RED.value) + "\n")
