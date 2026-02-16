@@ -1,0 +1,13 @@
+Catalog data collection info
+
+Messier: Stellarium 20251130
+Caldwell: Stellarium 20251130
+Sharpless2: The Sharpless Observing Atlas (Reiner Vogel December 2009)
+LDN: astronomy-mall.com
+Abell Galaxy Clusters: astronomy-mall.com
+Barnard Dark Objects: astronomy-mall.com
+LBN: Vizier
+Perek-Kohoutek: Catalogue of Galactic Planetary Nabulae
+NGC: OpenNGC
+IC: OpenNGC
+PGC: Vizier
