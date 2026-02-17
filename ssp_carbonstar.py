@@ -279,7 +279,6 @@ class Session:
         else:
             self.outfile.write("    TARGETNAME \"" + target_name + "\"\n")
         
-        
         #Slew and plate solve to a position 5 degrees off of target (Towards the equator) to get a rough platesolve
         dec_d_offset = int(dec_d)
         if(dec_d_offset > 0):
