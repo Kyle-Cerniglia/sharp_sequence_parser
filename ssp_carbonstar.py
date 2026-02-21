@@ -167,7 +167,7 @@ def coords_catalog() -> None:
 
 class Session:
     def __init__(
-        self, outfile, temperature, filter_type, telescope_type, exposure_time, timediv, dither, plate_exposure_time
+        self, outfile, temperature, filter_type, telescope_type, exposure_time, timediv, dither, plate_exposure_time, rough_focus
     ):
         self.outfile = outfile
         self.temperature = temperature
@@ -177,6 +177,7 @@ class Session:
         self.timediv = timediv
         self.dither = dither
         self.plate_exposure_time = plate_exposure_time
+        self.rough_focus = rough_focus
     
     def start_time(self) -> None:
         #Set start time
@@ -225,9 +226,15 @@ class Session:
             preset_val = Presets.CARBON_LRGB
         else:
             preset_val = Presets.CARBON_NB
-        self.outfile.write(f"    LOAD PROFILE {preset_val.value}\n")        
+        self.outfile.write(f"    LOAD PROFILE {preset_val.value}\n")
+        
+    def autofocus(self) -> None:
+        #Set rough target focus point
+        self.rough_focus = int(input("Set autofocuser rough focal point (Set to -1 to disable):\n"))
 
     def create_target(self) -> None:
+        frame_subtraction = 0
+        
         #Setup
         self.outfile.write("    DELAY 1\n")
         self.outfile.write("    STILL MODE\n")
@@ -239,6 +246,9 @@ class Session:
         self.preset()
             
         self.outfile.write("    MOUNT CONNECT\n")
+        
+        #Configure autofocus
+        self.autofocus()
 
         #Configure target
         if input("Lookup catalog target? (y/n)\n") == 'y':
@@ -269,13 +279,14 @@ class Session:
         else:
             self.outfile.write("    TARGETNAME \"" + target_name + "\"\n")
         
-        
         #Slew and plate solve to a position 5 degrees off of target (Towards the equator) to get a rough platesolve
         dec_d_offset = int(dec_d)
         if(dec_d_offset > 0):
             dec_d_offset = dec_d_offset - 5
         else:
             dec_d_offset = dec_d_offset + 5
+        self.outfile.write("    WHEEL MOVE TO 1\n")
+        self.outfile.write("    DELAY 10\n")
         self.outfile.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + str(dec_d_offset) + " " + dec_m + " " + dec_s + "\"\n")
         self.outfile.write("    DELAY 10\n")
         self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
@@ -304,6 +315,15 @@ class Session:
         self.outfile.write("        MOUNT SOLVEANDSYNC\n")
         self.outfile.write("    END PRESERVE\n")
         self.outfile.write("    DELAY 10\n")
+        
+        #Autofocus
+        if(self.rough_focus != -1):
+            self.outfile.write("    SET EXPOSURE TO 4\n")
+            self.outfile.write("    AUTOFOCUS FROM " + str(self.rough_focus - 100) + " TO " + str(self.rough_focus + 100) + " STEP COUNT 21\n")
+            #Remove 12 minutes from frame time for autofocus
+            frame_subtraction = 1440 / self.exposure_time
+        
+        #Set filter
         self.outfile.write("    WHEEL MOVE TO " + str(self.filter_type.value) + "\n")
         self.outfile.write("    DELAY 10\n")
 
@@ -327,6 +347,7 @@ class Session:
         self.outfile.write("        GUIDING DITHER EVERY " + str(self.dither) + " FRAMES\n")
         frame_duration = input("Enter number of hours to capture data\n")
         frame_qty = (float(frame_duration) * 3600) / self.timediv
+        frame_qty = frame_qty - frame_subtraction
         frame_qty = math.floor(frame_qty)
             
         frame_qty_s = str(frame_qty)
@@ -337,6 +358,8 @@ class Session:
         self.outfile.write("    GUIDING DISCONNECT\n\n")
     
     def create_rgb_target(self) -> None:
+        frame_subtraction = 0
+        
         #Setup
         self.outfile.write("    DELAY 1\n")
         self.outfile.write("    STILL MODE\n")
@@ -348,6 +371,9 @@ class Session:
         self.preset()
             
         self.outfile.write("    MOUNT CONNECT\n")
+        
+        #Configure autofocus
+        self.autofocus()
 
         #Configure target
         if input("Lookup catalog target? (y/n)\n") == 'y':
@@ -371,6 +397,8 @@ class Session:
             dec_d_offset = dec_d_offset - 5
         else:
             dec_d_offset = dec_d_offset + 5
+        self.outfile.write("    WHEEL MOVE TO 1\n")
+        self.outfile.write("    DELAY 10\n")
         self.outfile.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + str(dec_d_offset) + " " + dec_m + " " + dec_s + "\"\n")
         self.outfile.write("    DELAY 10\n")
         self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
@@ -399,6 +427,15 @@ class Session:
         self.outfile.write("        MOUNT SOLVEANDSYNC\n")
         self.outfile.write("    END PRESERVE\n")
         self.outfile.write("    DELAY 10\n")
+        
+        #Autofocus
+        if(self.rough_focus != -1):
+            self.outfile.write("    SET EXPOSURE TO 4\n")
+            self.outfile.write("    AUTOFOCUS FROM " + str(self.rough_focus - 100) + " TO " + str(self.rough_focus + 100) + " STEP COUNT 21\n")
+            #Remove 12 minutes from frame time for autofocus
+            frame_subtraction = 1440 / self.exposure_time
+        
+        #Set filter
         self.outfile.write("    WHEEL MOVE TO " + str(Filters.RED.value) + "\n")
         self.outfile.write("    DELAY 10\n")
 
@@ -422,6 +459,7 @@ class Session:
         self.outfile.write("        GUIDING DITHER EVERY " + str(self.dither) + " FRAMES\n")
         frame_duration = input("Enter number of hours to capture data\n")
         frame_qty = (float(frame_duration) * 3600) / self.timediv
+        frame_qty = frame_qty - frame_subtraction
         frame_qty = frame_qty / 3
         frame_qty = math.floor(frame_qty)
             
@@ -477,7 +515,7 @@ def main() -> None:
     filename += ".scs"
     fileout = open(filename, "w+")
 
-    session = Session(fileout, 100, Filters.LUMINANCE, Telescope.CARBON, 0, 0, 0, 0)
+    session = Session(fileout, 100, Filters.LUMINANCE, Telescope.CARBON, 0, 0, 0, 0, -1)
 
     session.start_time()
     

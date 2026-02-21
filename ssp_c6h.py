@@ -1,13 +1,15 @@
 # Parser for the sharpcap sequencer
+# Designed for an ASI533MC Pro mounted to a C6 with a Hyperstar
 
 import sys
 import math
 from enum import Enum
 from enum import auto
+import csv
+from pathlib import Path
+from typing import Optional
 
 class Telescope(Enum):
-    ORION = 1
-    TOWA = 2
     C6_HYPER = 3
     
 class Filters(Enum):
@@ -18,21 +20,10 @@ class Filters(Enum):
     D2 = 5
 
 class Presets(Enum):
-    ORION_OSC = "533 OSC"
-    ORION_NB = "533 HO"
     C6H_OSC = "C6H OSC"
     C6H_NB = "C6H NB"
 
 # Exposure time
-EXPOSURE_ORION = {
-    Filters.UVIR: 30,
-    Filters.LPRO: 30,
-    Filters.LENHANCE: 180
-}
-EXPOSURE_TOWA = {
-    Filters.UVIR: 60,
-    Filters.LPRO: 180
-}
 EXPOSURE_C6_HYPER = {
     Filters.UVIR: 30,
     Filters.LPRO: 30,
@@ -41,21 +32,10 @@ EXPOSURE_C6_HYPER = {
     Filters.D2: 240
 }
 EXPOSURE = {
-    Telescope.ORION: EXPOSURE_ORION,
-    Telescope.TOWA: EXPOSURE_TOWA,
     Telescope.C6_HYPER: EXPOSURE_C6_HYPER
 }
 
 # Platesolving exposure time
-PLATE_EXPOSURE_ORION = {
-    Filters.UVIR: 4,
-    Filters.LPRO: 4,
-    Filters.LENHANCE: 4
-}
-PLATE_EXPOSURE_TOWA = {
-    Filters.UVIR: 12,
-    Filters.LPRO: 12
-}
 PLATE_EXPOSURE_C6_HYPER = {
     Filters.UVIR: 1,
     Filters.LPRO: 1,
@@ -64,21 +44,10 @@ PLATE_EXPOSURE_C6_HYPER = {
     Filters.D2: 4
 }
 PLATE_EXPOSURE = {
-    Telescope.ORION: PLATE_EXPOSURE_ORION,
-    Telescope.TOWA: PLATE_EXPOSURE_TOWA,
     Telescope.C6_HYPER: PLATE_EXPOSURE_C6_HYPER
 }
 
 # Time divider for frame calculation
-TIMEDIV_ORION = {
-    Filters.UVIR: 35.08,
-    Filters.LPRO: 35.08,
-    Filters.LENHANCE: 188
-}
-TIMEDIV_TOWA = {
-    Filters.UVIR: 70.16,
-    Filters.LPRO: 181.73
-}
 TIMEDIV_C6_HYPER = {
     Filters.UVIR: 35.08,
     Filters.LPRO: 35.08,
@@ -87,21 +56,10 @@ TIMEDIV_C6_HYPER = {
     Filters.D2: 247
 }
 TIMEDIV = {
-    Telescope.ORION: TIMEDIV_ORION,
-    Telescope.TOWA: TIMEDIV_TOWA,
     Telescope.C6_HYPER: TIMEDIV_C6_HYPER
 }
 
 # Frames per dither
-DITHER_ORION = {
-    Filters.UVIR: 12,
-    Filters.LPRO: 12,
-    Filters.LENHANCE: 6
-}
-DITHER_TOWA = {
-    Filters.UVIR: 10,
-    Filters.LPRO: 6
-}
 DITHER_C6_HYPER = {
     Filters.UVIR: 12,
     Filters.LPRO: 12,
@@ -110,10 +68,81 @@ DITHER_C6_HYPER = {
     Filters.D2: 3
 }
 DITHER = {
-    Telescope.ORION: DITHER_ORION,
-    Telescope.TOWA: DITHER_TOWA,
     Telescope.C6_HYPER: DITHER_C6_HYPER
 }
+
+ra_h = ""
+ra_m = ""
+ra_s = ""
+dec_d = ""
+dec_m = ""
+dec_s = ""
+master_catalog = Path("catalogs") / "master.csv"
+list_catalog = Path("catalogs") / "available_catalogs.txt"
+catalog_search = ""
+catalog_used = False
+
+def coords_direct() -> None:
+    global ra_h
+    global ra_m
+    global ra_s
+    global dec_d
+    global dec_m
+    global dec_s
+    global catalog_used
+    
+    ra_h = input("Enter J2000 coordinates (RA h)\n")
+    ra_m = input("Enter J2000 coordinates (RA m)\n")
+    ra_s = input("Enter J2000 coordinates (RA s)\n")
+    dec_d = input("Enter J2000 coordinates (DEC d)\n")
+    dec_m = input("Enter J2000 coordinates (DEC m)\n")
+    dec_s = input("Enter J2000 coordinates (DEC s)\n")
+    
+    catalog_used = False
+    
+def coords_catalog() -> None:
+    global ra_h
+    global ra_m
+    global ra_s
+    global dec_d
+    global dec_m
+    global dec_s
+    global catalog_search
+    global catalog_used
+    
+    #Show users the available catalogs
+    print("Available catalogs:\n")
+    with list_catalog.open("r", encoding="utf-8") as f:
+        contents = f.read()
+    print(contents)
+    
+    catalog_search = input("\nEnter catalog name (Ex. m101):\n")
+    
+    try:
+        with master_catalog.open(mode="r", encoding="utf-8", newline="") as f:
+            reader = csv.reader(f)
+
+            for row in reader:
+                # Skip empty or short rows
+                if len(row) < 7:
+                    continue
+
+                if row[0] == catalog_search:
+                    ra_h = row[1]
+                    ra_m = row[2]
+                    ra_s = row[3]
+                    dec_d = row[4]
+                    dec_m = row[5]
+                    dec_s = row[6]
+                    catalog_used = True
+                    return
+            #If you got here, then the item wasn't found
+            print("Catalog object not found, please enter in coordinates manually\n")
+            coords_direct()
+
+    except FileNotFoundError:
+        print("Catalog file not found, please enter in coordinates manually\n")
+        coords_direct()
 
 class Session:
     def __init__(
@@ -153,8 +182,7 @@ class Session:
         self.temperature = input("Set cooler temp C (100 to disable)\n")
         
     def set_telescope(self) -> None:
-        scope_in = input("Select your telescope:\n[1] = Orion 130ST\n[2] = Towa 339\n[3] = C6 (Hyperstar)\n")
-        self.telescope_type = Telescope(int(scope_in))
+        self.telescope_type = Telescope(3)
         
     def set_filter(self) -> None:
         filter_in = input("Select your filter::\n[1] = UV/IR\n[2] = L-Enhance\n[3] = L-Pro\n[4] = D1\n[5] = D2\n")
@@ -167,27 +195,16 @@ class Session:
         self.dither = DITHER[self.telescope_type][self.filter_type]
         
     def preset(self) -> None:
-        preset_in = int(input("Select your preset:\n[1] = Orion OSC\n[2] = Orion NB\n[3] = C6 (Hyperstar) OSC\n[4] = C6 (Hyperstar) NB\n"))
-        if preset_in == 1:
-            preset_val = Presets.ORION_OSC
-        elif preset_in == 2:
-            preset_val = Presets.ORION_NB
-        elif preset_in == 3:
+        if self.filter_type in [Filters.UVIR, Filters.LENHANCE, Filters.LPRO]:
             preset_val = Presets.C6H_OSC
-        elif preset_in == 4:
-            preset_val = Presets.C6H_NB
         else:
-            raise ValueError("Invalid selection.")
+            preset_val = Presets.C6H_NB
         self.outfile.write(f"    LOAD PROFILE \"{preset_val.value}\"\n")
 
     def create_target(self) -> None:
         #Setup
         self.outfile.write("    DELAY 1\n")
         self.outfile.write("    STILL MODE\n")
-
-        #Set cooler temperature
-        if int(self.temperature) != 100:
-            self.outfile.write("    COOL DOWN TO " + self.temperature + " RATE 8 TOLERANCE 1\n")
 
         #Configure image formatting
         self.outfile.write("    SET COLOUR SPACE TO RAW16\n")
@@ -196,34 +213,57 @@ class Session:
         self.preset()
             
         self.outfile.write("    MOUNT CONNECT\n")
-
+        
         #Configure target
-        ra_h = input("Enter J2000 coordinates (RA h)\n")
-        ra_m = input("Enter J2000 coordinates (RA m)\n")
-        ra_s = input("Enter J2000 coordinates (RA s)\n")
-        dec_d = input("Enter J2000 coordinates (DEC d)\n")
-        dec_m = input("Enter J2000 coordinates (DEC m)\n")
-        dec_s = input("Enter J2000 coordinates (DEC s)\n")
-        self.outfile.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + dec_d + " " + dec_m + " " + dec_s + "\"\n")
-        self.outfile.write("    DELAY 20\n")
+        if input("Lookup catalog target? (y/n)\n") == 'y':
+            coords_catalog()
+        else:
+            coords_direct()
 
         #Set target name
-        target_name = input("Enter target name\n")
-        self.outfile.write("    TARGETNAME \"" + target_name + "\"\n")
-        self.outfile.write("    SET EXPOSURE TO " + str(self.exposure_time) + "\n")
-
+        if(catalog_used):
+            target_name = catalog_search
+        else:
+            target_name = input("Enter target name\n")
+        
+        if self.filter_type in [Filters.UVIR]:
+            self.outfile.write("    TARGETNAME \"" + target_name + "_uvir\"\n")
+        elif self.filter_type in [Filters.LPRO]:
+            self.outfile.write("    TARGETNAME \"" + target_name + "_lpro\"\n")
+        elif self.filter_type in [Filters.LENHANCE]:
+            self.outfile.write("    TARGETNAME \"" + target_name + "_lenh\"\n")
+        elif self.filter_type in [Filters.D1]:
+            self.outfile.write("    TARGETNAME \"" + target_name + "_d1\"\n")
+        elif self.filter_type in [Filters.D2]:
+            self.outfile.write("    TARGETNAME \"" + target_name + "_d2\"\n")
+        else:
+            self.outfile.write("    TARGETNAME \"" + target_name + "\"\n")
+            
         #Platesolve and correct position
+        self.outfile.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + dec_d + " " + dec_m + " " + dec_s + "\"\n")
+        self.outfile.write("    DELAY 10\n")
         self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
         self.outfile.write("        SET EXPOSURE TO " + str(self.plate_exposure_time) + "\n")
         self.outfile.write("        SET GAIN TO 100\n")
         self.outfile.write("        MOUNT SOLVEANDSYNC\n")
         self.outfile.write("    END PRESERVE\n")
         self.outfile.write("    DELAY 10\n")
-
-        #Set guiding and frame quantity
+        
+        #Set guiding
         self.outfile.write("    GUIDING CONNECT ABORT False\n")
+        self.outfile.write("    GUIDING STOP\n")
+        self.outfile.write("    DELAY 5\n")
         self.outfile.write("    GUIDING START\n")
-        self.outfile.write("    DELAY 20\n")
+        self.outfile.write("    DELAY 10\n")
+        
+        #Set cooler temperature
+        if int(self.temperature) != 100:
+            self.outfile.write("    COOL DOWN TO " + self.temperature + " RATE 8 TOLERANCE 1\n")
+        
+        #Set exposure
+        self.outfile.write("    SET EXPOSURE TO " + str(self.exposure_time) + "\n")
+        
+        #Set frame capture
         self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
         self.outfile.write("        FRAMETYPE Light\n")
         self.outfile.write("        GUIDING DITHER EVERY " + str(self.dither) + " FRAMES\n")
@@ -258,7 +298,7 @@ def main() -> None:
     filename += ".scs"
     fileout = open(filename, "w+")
 
-    session = Session(fileout, 100, Filters.UVIR, Telescope.ORION, 0, 0, 0, 0)
+    session = Session(fileout, 100, Filters.UVIR, Telescope.C6_HYPER, 0, 0, 0, 0)
 
     session.start_time()
     
