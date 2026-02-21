@@ -199,7 +199,7 @@ class Session:
             preset_val = Presets.C6H_OSC
         else:
             preset_val = Presets.C6H_NB
-        self.outfile.write(f"    LOAD PROFILE {preset_val.value}\n")
+        self.outfile.write(f"    LOAD PROFILE \"{preset_val.value}\"\n")
 
     def create_target(self) -> None:
         #Setup
