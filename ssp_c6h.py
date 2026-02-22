@@ -40,8 +40,8 @@ PLATE_EXPOSURE_C6_HYPER = {
     Filters.UVIR: 1,
     Filters.LPRO: 1,
     Filters.LENHANCE: 2,
-    Filters.D1: 4,
-    Filters.D2: 4
+    Filters.D1: 8,
+    Filters.D2: 8
 }
 PLATE_EXPOSURE = {
     Telescope.C6_HYPER: PLATE_EXPOSURE_C6_HYPER
