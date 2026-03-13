@@ -279,9 +279,9 @@ class Session:
         else:
             self.outfile.write("    TARGETNAME \"" + target_name + "\"\n")
         
-        #Slew and plate solve to a position 2 degrees off of target (Towards the equator) to get a rough platesolve
+        #Slew and plate solve to a position 2 degrees off of target (Towards north, unless within 85 degrees) to get a rough platesolve
         dec_d_offset = int(dec_d)
-        if(dec_d_offset > 0):
+        if(dec_d_offset > 85):
             dec_d_offset = dec_d_offset - 2
         else:
             dec_d_offset = dec_d_offset + 2
@@ -391,9 +391,9 @@ class Session:
         
         self.outfile.write("    TARGETNAME \"" + target_name + "_r\"\n")
         
-        #Slew and plate solve to a position 2 degrees off of target (Towards the equator) to get a rough platesolve
+        #Slew and plate solve to a position 2 degrees off of target (Towards north, unless within 85 degrees) to get a rough platesolve
         dec_d_offset = int(dec_d)
-        if(dec_d_offset > 0):
+        if(dec_d_offset > 85):
             dec_d_offset = dec_d_offset - 2
         else:
             dec_d_offset = dec_d_offset + 2
