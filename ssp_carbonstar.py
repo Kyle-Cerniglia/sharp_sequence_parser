@@ -279,12 +279,12 @@ class Session:
         else:
             self.outfile.write("    TARGETNAME \"" + target_name + "\"\n")
         
-        #Slew and plate solve to a position 2 degrees off of target (Towards north, unless within 85 degrees) to get a rough platesolve
+        #Slew and plate solve to a position 3 degrees off of target (Towards north, unless within 85 degrees) to get a rough platesolve
         dec_d_offset = int(dec_d)
         if(dec_d_offset > 85):
-            dec_d_offset = dec_d_offset - 2
+            dec_d_offset = dec_d_offset - 3
         else:
-            dec_d_offset = dec_d_offset + 2
+            dec_d_offset = dec_d_offset + 3
         self.outfile.write("    WHEEL MOVE TO 1\n")
         self.outfile.write("    DELAY 10\n")
         self.outfile.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + str(dec_d_offset) + " " + dec_m + " " + dec_s + "\"\n")
@@ -391,12 +391,12 @@ class Session:
         
         self.outfile.write("    TARGETNAME \"" + target_name + "_r\"\n")
         
-        #Slew and plate solve to a position 2 degrees off of target (Towards north, unless within 85 degrees) to get a rough platesolve
+        #Slew and plate solve to a position 3 degrees off of target (Towards north, unless within 85 degrees) to get a rough platesolve
         dec_d_offset = int(dec_d)
         if(dec_d_offset > 85):
-            dec_d_offset = dec_d_offset - 2
+            dec_d_offset = dec_d_offset - 3
         else:
-            dec_d_offset = dec_d_offset + 2
+            dec_d_offset = dec_d_offset + 3
         self.outfile.write("    WHEEL MOVE TO 1\n")
         self.outfile.write("    DELAY 10\n")
         self.outfile.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + str(dec_d_offset) + " " + dec_m + " " + dec_s + "\"\n")
