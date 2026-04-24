@@ -49,7 +49,7 @@ PLATE_EXPOSURE = {
 
 # Time divider for frame calculation
 TIMEDIV_C6_HYPER = {
-    Filters.UVIR: 17.5,
+    Filters.UVIR: 18.62,
     Filters.LPRO: 35.08,
     Filters.LENHANCE: 133,
     Filters.D1: 247,
