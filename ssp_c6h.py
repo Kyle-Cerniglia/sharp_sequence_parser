@@ -25,7 +25,7 @@ class Presets(Enum):
 
 # Exposure time
 EXPOSURE_C6_HYPER = {
-    Filters.UVIR: 30,
+    Filters.UVIR: 15,
     Filters.LPRO: 30,
     Filters.LENHANCE: 120,
     Filters.D1: 240,
@@ -49,7 +49,7 @@ PLATE_EXPOSURE = {
 
 # Time divider for frame calculation
 TIMEDIV_C6_HYPER = {
-    Filters.UVIR: 35.08,
+    Filters.UVIR: 17.5,
     Filters.LPRO: 35.08,
     Filters.LENHANCE: 133,
     Filters.D1: 247,
@@ -61,7 +61,7 @@ TIMEDIV = {
 
 # Frames per dither
 DITHER_C6_HYPER = {
-    Filters.UVIR: 12,
+    Filters.UVIR: 24,
     Filters.LPRO: 12,
     Filters.LENHANCE: 8,
     Filters.D1: 3,
