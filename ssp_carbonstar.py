@@ -389,9 +389,9 @@ def create_target() -> None:
 
     # Configure target
     if input("Lookup catalog target? (y/n)\n") == "y":
-        coords_catalog()
+        ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used, catalog_search = coords_catalog()
     else:
-        coords_direct()
+        ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used = coords_direct()
 
     # Set target name
     if catalog_used:
@@ -450,9 +450,9 @@ def create_rgb_target() -> None:
 
     # Configure target
     if input("Lookup catalog target? (y/n)\n") == "y":
-        coords_catalog()
+        ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used, catalog_search = coords_catalog()
     else:
-        coords_direct()
+        ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used = coords_direct()
 
     # Set target name
     if catalog_used:

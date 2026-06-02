@@ -39,13 +39,13 @@ def coords_catalog():
                     dec_m = row[5]
                     dec_s = row[6]
                     catalog_used = True
-                    return ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used
+                    return ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used, catalog_search
             #If you got here, then the item wasn't found
             print("Catalog object not found, please enter in coordinates manually\n")
             ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used = coords_direct()
-            return ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used
+            return ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used, catalog_search
 
     except FileNotFoundError:
         print("Catalog file not found, please enter in coordinates manually\n")
         ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used = coords_direct()
-        return ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used
+        return ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used, catalog_search

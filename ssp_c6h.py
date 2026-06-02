@@ -208,7 +208,7 @@ def create_target() -> None:
 
     # Configure target
     if input("Lookup catalog target? (y/n)\n") == "y":
-        ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used = coords_catalog()
+        ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used, catalog_search = coords_catalog()
     else:
         ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used = coords_direct()
 
