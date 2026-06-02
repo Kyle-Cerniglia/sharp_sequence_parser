@@ -125,7 +125,6 @@ def init_session(
     dither = dither_val
     plate_exposure_time = plate_exposure_val
 
-
 def start_time() -> None:
     global outfile
 
@@ -133,7 +132,6 @@ def start_time() -> None:
     if input("Set a start time? (y/n)\n") == "y":
         hour = input("Enter hour start (24h)\n")
         minute = input("Enter minute start\n")
-
         if int(minute) < 10:
             minute = "0" + minute
 
