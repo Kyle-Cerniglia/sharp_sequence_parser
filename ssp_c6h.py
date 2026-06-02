@@ -82,6 +82,16 @@ list_catalog = Path("catalogs") / "available_catalogs.txt"
 catalog_search = ""
 catalog_used = False
 
+# Local function variables
+outfile = None
+temperature = None
+filter_type = None
+telescope_type = None
+exposure_time = None
+timediv = None
+dither = None
+plate_exposure_time = None
+
 def coords_direct() -> None:
     global ra_h
     global ra_m
@@ -97,7 +107,6 @@ def coords_direct() -> None:
     dec_d = input("Enter J2000 coordinates (DEC d)\n")
     dec_m = input("Enter J2000 coordinates (DEC m)\n")
     dec_s = input("Enter J2000 coordinates (DEC s)\n")
-    
     catalog_used = False
     
 def coords_catalog() -> None:
@@ -115,7 +124,6 @@ def coords_catalog() -> None:
     with list_catalog.open("r", encoding="utf-8") as f:
         contents = f.read()
     print(contents)
-    
     catalog_search = input("\nEnter catalog name (Ex. m101):\n")
     
     try:
@@ -144,147 +152,207 @@ def coords_catalog() -> None:
         print("Catalog file not found, please enter in coordinates manually\n")
         coords_direct()
 
-class Session:
-    def __init__(
-        self, outfile, temperature, filter_type, telescope_type, exposure_time, timediv, dither, plate_exposure_time
-    ):
-        self.outfile = outfile
-        self.temperature = temperature
-        self.filter_type = filter_type
-        self.telescope_type = telescope_type
-        self.exposure_time = exposure_time
-        self.timediv = timediv
-        self.dither = dither
-        self.plate_exposure_time = plate_exposure_time
-    
-    def start_time(self) -> None:
-        #Set start time
-        self.outfile.write("SEQUENCE\n")
-    
-        if input("Set a start time? (y/n)\n") == 'y':
-            hour = input("Enter hour start (24h)\n")
-            minute = input("Enter minute start\n")
-            if int(minute) < 10:
-                minute = "0" + minute
-            if int(hour) < 12:
-                self.outfile.write("    WAIT UNTIL LOCALTIME \"" + hour + ":" + minute + " AM\"\n")
-            else:
-                hour = str(int(hour) - 12);
-                self.outfile.write("    WAIT UNTIL LOCALTIME \"" + hour + ":" + minute + " PM\"\n")
-                
-    def unpark(self) -> None:
-        self.outfile.write("    DELAY 1\n")
-        self.outfile.write("    MOUNT UNPARK\n")
-        self.outfile.write("    MOUNT UNPARK\n")
-    
-    def set_temp(self) -> None:
-        #Set cooler temperature
-        self.temperature = input("Set cooler temp C (100 to disable)\n")
-        
-    def set_telescope(self) -> None:
-        self.telescope_type = Telescope(3)
-        
-    def set_filter(self) -> None:
-        filter_in = input("Select your filter::\n[1] = UV/IR\n[2] = L-Enhance\n[3] = L-Pro\n[4] = D1\n[5] = D2\n")
-        self.filter_type = Filters(int(filter_in))
-    
-    def calc_capture_vals(self) -> None:
-        self.exposure_time = EXPOSURE[self.telescope_type][self.filter_type]
-        self.plate_exposure_time = PLATE_EXPOSURE[self.telescope_type][self.filter_type]
-        self.timediv = TIMEDIV[self.telescope_type][self.filter_type]
-        self.dither = DITHER[self.telescope_type][self.filter_type]
-        
-    def preset(self) -> None:
-        if self.filter_type in [Filters.UVIR, Filters.LENHANCE, Filters.LPRO]:
-            preset_val = Presets.C6H_OSC
-        else:
-            preset_val = Presets.C6H_NB
-        self.outfile.write(f"    LOAD PROFILE \"{preset_val.value}\"\n")
+def init_session(
+    out_file,
+    temp=None,
+    filter_val=None,
+    telescope_val=None,
+    exposure_val=None,
+    timediv_val=None,
+    dither_val=None,
+    plate_exposure_val=None,
+) -> None:
+    """
+    Replaces Session.__init__().
+    Stores the session data in globals instead of self fields.
+    """
 
-    def create_target(self) -> None:
-        #Setup
-        self.outfile.write("    DELAY 1\n")
-        self.outfile.write("    STILL MODE\n")
+    global outfile
+    global temperature
+    global filter_type
+    global telescope_type
+    global exposure_time
+    global timediv
+    global dither
+    global plate_exposure_time
 
-        #Configure image formatting
-        self.outfile.write("    SET COLOUR SPACE TO RAW16\n")
-        self.outfile.write("    SET OUTPUT FORMAT TO \"FITS files (*.fits)\"\n")
-        
-        self.preset()
-            
-        self.outfile.write("    MOUNT CONNECT\n")
-        
-        #Configure target
-        if input("Lookup catalog target? (y/n)\n") == 'y':
-            coords_catalog()
-        else:
-            coords_direct()
+    outfile = out_file
+    temperature = temp
+    filter_type = filter_val
+    telescope_type = telescope_val
+    exposure_time = exposure_val
+    timediv = timediv_val
+    dither = dither_val
+    plate_exposure_time = plate_exposure_val
 
-        #Set target name
-        if(catalog_used):
-            target_name = catalog_search
+def start_time() -> None:
+    global outfile
+
+    outfile.write("SEQUENCE\n")
+    if input("Set a start time? (y/n)\n") == "y":
+        hour = input("Enter hour start (24h)\n")
+        minute = input("Enter minute start\n")
+        if int(minute) < 10:
+            minute = "0" + minute
+
+        if int(hour) < 12:
+            outfile.write(
+                "    WAIT UNTIL LOCALTIME \"" + hour + ":" + minute + " AM\"\n"
+            )
         else:
-            target_name = input("Enter target name\n")
-        
-        if self.filter_type in [Filters.UVIR]:
-            self.outfile.write("    TARGETNAME \"" + target_name + "_uvir\"\n")
-        elif self.filter_type in [Filters.LPRO]:
-            self.outfile.write("    TARGETNAME \"" + target_name + "_lpro\"\n")
-        elif self.filter_type in [Filters.LENHANCE]:
-            self.outfile.write("    TARGETNAME \"" + target_name + "_lenh\"\n")
-        elif self.filter_type in [Filters.D1]:
-            self.outfile.write("    TARGETNAME \"" + target_name + "_d1\"\n")
-        elif self.filter_type in [Filters.D2]:
-            self.outfile.write("    TARGETNAME \"" + target_name + "_d2\"\n")
-        else:
-            self.outfile.write("    TARGETNAME \"" + target_name + "\"\n")
-            
-        #Platesolve and correct position
-        self.outfile.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + dec_d + " " + dec_m + " " + dec_s + "\"\n")
-        self.outfile.write("    DELAY 10\n")
-        self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
-        self.outfile.write("        SET EXPOSURE TO " + str(self.plate_exposure_time) + "\n")
-        self.outfile.write("        SET GAIN TO 100\n")
-        self.outfile.write("        MOUNT SOLVEANDSYNC\n")
-        self.outfile.write("    END PRESERVE\n")
-        self.outfile.write("    DELAY 10\n")
-        
-        #Set guiding
-        self.outfile.write("    GUIDING CONNECT ABORT False\n")
-        self.outfile.write("    GUIDING STOP\n")
-        self.outfile.write("    DELAY 5\n")
-        self.outfile.write("    GUIDING START\n")
-        self.outfile.write("    DELAY 10\n")
-        
-        #Set cooler temperature
-        if int(self.temperature) != 100:
-            self.outfile.write("    COOL DOWN TO " + self.temperature + " RATE 8 TOLERANCE 1\n")
-        
-        #Set exposure
-        self.outfile.write("    SET EXPOSURE TO " + str(self.exposure_time) + "\n")
-        
-        #Set frame capture
-        self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
-        self.outfile.write("        FRAMETYPE Light\n")
-        self.outfile.write("        GUIDING DITHER EVERY " + str(self.dither) + " FRAMES\n")
-        frame_duration = input("Enter number of hours to capture data\n")
-        frame_qty = (float(frame_duration) * 3600) / self.timediv
-        frame_qty = math.floor(frame_qty)
-            
-        frame_qty_s = str(frame_qty)
-        self.outfile.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
-        self.outfile.write("        GUIDING DITHER EVERY STOP\n")
-        self.outfile.write("    END PRESERVE\n")
-        self.outfile.write("    GUIDING STOP\n")
-        self.outfile.write("    GUIDING DISCONNECT\n\n")
-        
-    def shutdown(self) -> None:
-        #Final Shutdown
-        self.outfile.write("    MOUNT PARK\n")
-        if int(self.temperature) != 100:
-            self.outfile.write("    SET COOLER OFF\n")
-        self.outfile.write("END SEQUENCE\n")
-        self.outfile.close()
+            hour = str(int(hour) - 12)
+            outfile.write(
+                "    WAIT UNTIL LOCALTIME \"" + hour + ":" + minute + " PM\"\n"
+            )
+
+def unpark() -> None:
+    global outfile
+
+    outfile.write("    DELAY 1\n")
+    outfile.write("    MOUNT UNPARK\n")
+    outfile.write("    MOUNT UNPARK\n")
+
+def set_temp() -> None:
+    global temperature
+
+    temperature = input("Set cooler temp C (100 to disable)\n")
+
+def set_telescope() -> None:
+    global telescope_type
+
+    telescope_type = Telescope(3)
+
+def set_filter() -> None:
+    global filter_type
+
+    filter_in = input(
+        "Select your filter::\n"
+        "[1] = UV/IR\n"
+        "[2] = L-Enhance\n"
+        "[3] = L-Pro\n"
+        "[4] = D1\n"
+        "[5] = D2\n"
+    )
+    filter_type = Filters(int(filter_in))
+
+def calc_capture_vals() -> None:
+    global exposure_time
+    global plate_exposure_time
+    global timediv
+    global dither
+
+    exposure_time = EXPOSURE[telescope_type][filter_type]
+    plate_exposure_time = PLATE_EXPOSURE[telescope_type][filter_type]
+    timediv = TIMEDIV[telescope_type][filter_type]
+    dither = DITHER[telescope_type][filter_type]
+
+def preset() -> None:
+    global outfile
+
+    if filter_type in [Filters.UVIR, Filters.LENHANCE, Filters.LPRO]:
+        preset_val = Presets.C6H_OSC
+    else:
+        preset_val = Presets.C6H_NB
+    outfile.write(f"    LOAD PROFILE \"{preset_val.value}\"\n")
+
+def create_target() -> None:
+    global outfile
+
+    # Setup
+    outfile.write("    DELAY 1\n")
+    outfile.write("    STILL MODE\n")
+
+    # Configure image formatting
+    outfile.write("    SET COLOUR SPACE TO RAW16\n")
+    outfile.write("    SET OUTPUT FORMAT TO \"FITS files (*.fits)\"\n")
+    preset()
+    outfile.write("    MOUNT CONNECT\n")
+
+    # Configure target
+    if input("Lookup catalog target? (y/n)\n") == "y":
+        coords_catalog()
+    else:
+        coords_direct()
+
+    # Set target name
+    if catalog_used:
+        target_name = catalog_search
+    else:
+        target_name = input("Enter target name\n")
+
+    if filter_type == Filters.UVIR:
+        outfile.write("    TARGETNAME \"" + target_name + "_uvir\"\n")
+    elif filter_type == Filters.LPRO:
+        outfile.write("    TARGETNAME \"" + target_name + "_lpro\"\n")
+    elif filter_type == Filters.LENHANCE:
+        outfile.write("    TARGETNAME \"" + target_name + "_lenh\"\n")
+    elif filter_type == Filters.D1:
+        outfile.write("    TARGETNAME \"" + target_name + "_d1\"\n")
+    elif filter_type == Filters.D2:
+        outfile.write("    TARGETNAME \"" + target_name + "_d2\"\n")
+    else:
+        outfile.write("    TARGETNAME \"" + target_name + "\"\n")
+
+    # Platesolve and correct position
+    outfile.write(
+        "    MOUNT GOTO \""
+        + ra_h
+        + " "
+        + ra_m
+        + " "
+        + ra_s
+        + ", "
+        + dec_d
+        + " "
+        + dec_m
+        + " "
+        + dec_s
+        + "\"\n"
+    )
+
+    outfile.write("    DELAY 10\n")
+    outfile.write("    PRESERVE CAMERA SETTINGS\n")
+    outfile.write("        SET EXPOSURE TO " + str(plate_exposure_time) + "\n")
+    outfile.write("        SET GAIN TO 100\n")
+    outfile.write("        MOUNT SOLVEANDSYNC\n")
+    outfile.write("    END PRESERVE\n")
+    outfile.write("    DELAY 10\n")
+
+    # Set guiding
+    outfile.write("    GUIDING CONNECT ABORT False\n")
+    outfile.write("    GUIDING STOP\n")
+    outfile.write("    DELAY 5\n")
+    outfile.write("    GUIDING START\n")
+    outfile.write("    DELAY 10\n")
+
+    # Set cooler temperature
+    if int(temperature) != 100:
+        outfile.write("    COOL DOWN TO " + temperature + " RATE 8 TOLERANCE 1\n")
+
+    # Set exposure
+    outfile.write("    SET EXPOSURE TO " + str(exposure_time) + "\n")
+
+    # Set frame capture
+    outfile.write("    PRESERVE CAMERA SETTINGS\n")
+    outfile.write("        FRAMETYPE Light\n")
+    outfile.write("        GUIDING DITHER EVERY " + str(dither) + " FRAMES\n")
+    frame_duration = input("Enter number of hours to capture data\n")
+    frame_qty = (float(frame_duration) * 3600) / timediv
+    frame_qty = math.floor(frame_qty)
+    outfile.write("        CAPTURE " + str(frame_qty) + " FRAMES REQUIREGUIDING True\n")
+    outfile.write("        GUIDING DITHER EVERY STOP\n")
+    outfile.write("    END PRESERVE\n")
+    outfile.write("    GUIDING STOP\n")
+    outfile.write("    GUIDING DISCONNECT\n\n")
+
+def shutdown() -> None:
+    global outfile
+    
+    outfile.write("    MOUNT PARK\n")
+    if int(temperature) != 100:
+        outfile.write("    SET COOLER OFF\n")
+    outfile.write("END SEQUENCE\n")
+    outfile.close()
 
 def main() -> None:
     if len(sys.argv) != 1:
@@ -298,27 +366,27 @@ def main() -> None:
     filename += ".scs"
     fileout = open(filename, "w+")
 
-    session = Session(fileout, 100, Filters.UVIR, Telescope.C6_HYPER, 0, 0, 0, 0)
+    init_session(fileout, 100, Filters.UVIR, Telescope.C6_HYPER, 0, 0, 0, 0)
 
-    session.start_time()
+    start_time()
     
-    session.set_temp()
+    set_temp()
     
-    session.set_telescope()
+    set_telescope()
     
-    session.set_filter()
+    set_filter()
     
-    session.calc_capture_vals()
+    calc_capture_vals()
     
-    session.unpark()
+    unpark()
 
-    session.create_target()
+    create_target()
 
     #Insert additional targets
     while input("Enter additional target? (y/n)") == 'y':
-        session.create_target()
+        create_target()
 
-    session.shutdown()
+    shutdown()
 
     print("Sequence file generated!\n")
 
