@@ -8,7 +8,7 @@ from enum import auto
 import ssp_common
 
 class Telescope(Enum):
-    TOWA = 2
+    TOWA = 1
     
 class Filters(Enum):
     LUMINANCE = 1
@@ -130,7 +130,7 @@ def init_session(
 def set_telescope() -> None:
     global telescope_type
 
-    telescope_type = Telescope(2)
+    telescope_type = Telescope(1)
 
 def set_filter() -> None:
     global filter_type
