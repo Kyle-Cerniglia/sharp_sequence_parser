@@ -7,9 +7,6 @@ from enum import Enum
 from enum import auto
 from typing import Optional
 import ssp_common
-
-class Telescope(Enum):
-    C6_HYPER = 1
     
 class Filters(Enum):
     UVIR = 1
@@ -71,7 +68,6 @@ def init_session(
     out_file,
     temp=None,
     filter_val=None,
-    telescope_val=None,
     exposure_val=None,
     timediv_val=None,
     dither_val=None,
@@ -246,7 +242,7 @@ def main() -> None:
     filename += ".scs"
     fileout = open(filename, "w+")
 
-    init_session(fileout, 100, Filters.UVIR, Telescope.C6_HYPER, 0, 0, 0, 0)
+    init_session(fileout, 100, Filters.UVIR, 0, 0, 0, 0)
 
     ssp_common.start_time(outfile)
     

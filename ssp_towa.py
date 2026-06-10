@@ -6,9 +6,6 @@ import math
 from enum import Enum
 from enum import auto
 import ssp_common
-
-class Telescope(Enum):
-    TOWA = 1
     
 class Filters(Enum):
     LUMINANCE = 1
@@ -77,7 +74,6 @@ def init_session(
     out_file,
     temp=None,
     filter_val=None,
-    telescope_val=None,
     exposure_val=None,
     timediv_val=None,
     dither_val=None,
@@ -285,7 +281,7 @@ def main() -> None:
     filename += ".scs"
     fileout = open(filename, "w+")
 
-    init_session(fileout, 100, Filters.LUMINANCE, Telescope.TOWA, 0, 0, 0, 0)
+    init_session(fileout, 100, Filters.LUMINANCE, 0, 0, 0, 0)
 
     ssp_common.start_time(outfile)
     
