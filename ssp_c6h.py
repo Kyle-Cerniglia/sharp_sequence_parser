@@ -9,7 +9,7 @@ from typing import Optional
 import ssp_common
 
 class Telescope(Enum):
-    C6_HYPER = 3
+    C6_HYPER = 1
     
 class Filters(Enum):
     UVIR = 1
@@ -124,7 +124,7 @@ def init_session(
 def set_telescope() -> None:
     global telescope_type
 
-    telescope_type = Telescope(3)
+    telescope_type = Telescope(1)
 
 def set_filter() -> None:
     global filter_type
@@ -145,7 +145,7 @@ def calc_capture_vals() -> None:
     global timediv
     global dither
 
-    exposure_time = EXPOSURE[telescope_type][filter_type]
+    exposure_time = Exposure[filter_type.name].value
     plate_exposure_time = PLATE_EXPOSURE[telescope_type][filter_type]
     timediv = TIMEDIV[telescope_type][filter_type]
     dither = DITHER[telescope_type][filter_type]

@@ -25,22 +25,17 @@ class Filters(Enum):
 class Presets(Enum):
     CARBON_LRGB = "MC8_LRGB"
     CARBON_NB = "MC8_NB"
-
-# Exposure time
-EXPOSURE_CARBON = {
-    Filters.LUMINANCE: 30,
-    Filters.RED: 30,
-    Filters.GREEN: 30,
-    Filters.BLUE: 30,
-    Filters.SII: 180,
-    Filters.HA: 180,
-    Filters.OIII: 180,
-    Filters.NONE: 2,
-    Filters.RGB: 30
-}
-EXPOSURE = {
-    Telescope.CARBON: EXPOSURE_CARBON
-}
+    
+class Exposure(Enum):
+    LUMINANCE = 30
+    RED = 30
+    GREEN = 30
+    BLUE = 30
+    SII = 180
+    HA = 180
+    OIII = 180
+    NONE = 2
+    RGB = 30
 
 # Platesolving exposure time
 PLATE_EXPOSURE_CARBON = {
@@ -181,7 +176,7 @@ def calc_capture_vals() -> None:
     global timediv
     global dither
 
-    exposure_time = EXPOSURE[telescope_type][filter_type]
+    exposure_time = Exposure[filter_type.name].value
     plate_exposure_time = PLATE_EXPOSURE[telescope_type][filter_type]
     timediv = TIMEDIV[telescope_type][filter_type]
     dither = DITHER[telescope_type][filter_type]
