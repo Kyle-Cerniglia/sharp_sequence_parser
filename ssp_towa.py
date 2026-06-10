@@ -24,20 +24,15 @@ class Presets(Enum):
     TOWA_RGB = "MC8_RGB"
     TOWA_NB = "MC8_NB"
 
-# Exposure time
-EXPOSURE_TOWA = {
-    Filters.LUMINANCE: 2,
-    Filters.RED: 60,
-    Filters.GREEN: 60,
-    Filters.BLUE: 60,
-    Filters.SII: 180,
-    Filters.HA: 180,
-    Filters.OIII: 180,
-    Filters.NONE: 2
-}
-EXPOSURE = {
-    Telescope.TOWA: EXPOSURE_TOWA
-}
+class Exposure(Enum):
+    LUMINANCE = 2
+    RED = 60
+    GREEN = 60
+    BLUE = 60
+    SII = 180
+    HA = 180
+    OIII = 180
+    NONE = 2
 
 # Platesolving exposure time
 PLATE_EXPOSURE_TOWA = {
@@ -154,7 +149,7 @@ def calc_capture_vals() -> None:
     global timediv
     global dither
 
-    exposure_time = EXPOSURE[telescope_type][filter_type]
+    exposure_time = Exposure[filter_type.name].value
     plate_exposure_time = PLATE_EXPOSURE[telescope_type][filter_type]
     timediv = TIMEDIV[telescope_type][filter_type]
     dither = DITHER[telescope_type][filter_type]

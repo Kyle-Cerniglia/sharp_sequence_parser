@@ -22,17 +22,12 @@ class Presets(Enum):
     C6H_OSC = "C6H OSC"
     C6H_NB = "C6H NB"
 
-# Exposure time
-EXPOSURE_C6_HYPER = {
-    Filters.UVIR: 15,
-    Filters.LPRO: 30,
-    Filters.LENHANCE: 120,
-    Filters.D1: 240,
-    Filters.D2: 240
-}
-EXPOSURE = {
-    Telescope.C6_HYPER: EXPOSURE_C6_HYPER
-}
+class Exposure(Enum):
+    UVIR = 15
+    LPRO = 30
+    LENHANCE = 120
+    D1 = 240
+    D2 = 240
 
 # Platesolving exposure time
 PLATE_EXPOSURE_C6_HYPER = {
