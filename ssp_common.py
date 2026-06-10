@@ -95,3 +95,11 @@ def start_guiding(outfile) -> None:
 def stop_guiding(outfile) -> None:
     outfile.write("    GUIDING STOP\n")
     outfile.write("    GUIDING DISCONNECT\n\n")
+    
+def write_light_capture(outfile, frame_qty: int, dither: int) -> None:
+    outfile.write("    PRESERVE CAMERA SETTINGS\n")
+    outfile.write("        FRAMETYPE Light\n")
+    outfile.write("        GUIDING DITHER EVERY " + str(dither) + " FRAMES\n")
+    outfile.write("        CAPTURE " + str(frame_qty) + " FRAMES REQUIREGUIDING True\n")
+    outfile.write("        GUIDING DITHER EVERY STOP\n")
+    outfile.write("    END PRESERVE\n")

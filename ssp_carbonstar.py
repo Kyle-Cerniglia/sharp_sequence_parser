@@ -268,16 +268,6 @@ def cool_camera() -> None:
     if int(temperature) != 100:
         outfile.write("    COOL DOWN TO " + temperature + " RATE 25 TOLERANCE 1\n")
 
-def write_light_capture(frame_qty: int) -> None:
-    global outfile
-
-    outfile.write("    PRESERVE CAMERA SETTINGS\n")
-    outfile.write("        FRAMETYPE Light\n")
-    outfile.write("        GUIDING DITHER EVERY " + str(dither) + " FRAMES\n")
-    outfile.write("        CAPTURE " + str(frame_qty) + " FRAMES REQUIREGUIDING True\n")
-    outfile.write("        GUIDING DITHER EVERY STOP\n")
-    outfile.write("    END PRESERVE\n")
-
 def create_target() -> None:
     global outfile
     global ra_h
@@ -288,6 +278,7 @@ def create_target() -> None:
     global dec_s
     global catalog_used
     global catalog_search
+    global dither
 
     # Setup
     outfile.write("    DELAY 1\n")
@@ -344,7 +335,7 @@ def create_target() -> None:
     frame_qty = (float(frame_duration) * 3600) / timediv
     frame_qty = frame_qty - frame_subtraction # Autocal time
     frame_qty = math.floor(frame_qty)
-    write_light_capture(frame_qty)
+    ssp_common.write_light_capture(outfile, frame_qty, dither)
     
     #Finish target
     ssp_common.stop_guiding(outfile)
@@ -359,6 +350,7 @@ def create_rgb_target() -> None:
     global dec_s
     global catalog_used
     global catalog_search
+    global dither
 
     # Setup
     outfile.write("    DELAY 1\n")
@@ -418,19 +410,19 @@ def create_rgb_target() -> None:
     frame_qty = math.floor(frame_qty)
 
     # Capture RED
-    write_light_capture(frame_qty)
+    ssp_common.write_light_capture(outfile, frame_qty, dither)
 
     # Capture GREEN
     outfile.write("    TARGETNAME \"" + target_name + "_g\"\n")
     outfile.write("    WHEEL MOVE TO " + str(Filters.GREEN.value) + "\n")
     outfile.write("    DELAY 10\n")
-    write_light_capture(frame_qty)
+    ssp_common.write_light_capture(outfile, frame_qty, dither)
 
     # Capture BLUE
     outfile.write("    TARGETNAME \"" + target_name + "_b\"\n")
     outfile.write("    WHEEL MOVE TO " + str(Filters.BLUE.value) + "\n")
     outfile.write("    DELAY 10\n")
-    write_light_capture(frame_qty)
+    ssp_common.write_light_capture(outfile, frame_qty, dither)
 
     # Finish target
     ssp_common.stop_guiding(outfile)

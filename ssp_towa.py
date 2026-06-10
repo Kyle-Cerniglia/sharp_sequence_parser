@@ -196,18 +196,9 @@ def cool_camera() -> None:
     if int(temperature) != 100:
         outfile.write("    COOL DOWN TO " + temperature + " RATE 25 TOLERANCE 1\n")
 
-def write_light_capture(frame_qty: int) -> None:
-    global outfile
-
-    outfile.write("    PRESERVE CAMERA SETTINGS\n")
-    outfile.write("        FRAMETYPE Light\n")
-    outfile.write("        GUIDING DITHER EVERY " + str(dither) + " FRAMES\n")
-    outfile.write("        CAPTURE " + str(frame_qty) + " FRAMES REQUIREGUIDING True\n")
-    outfile.write("        GUIDING DITHER EVERY STOP\n")
-    outfile.write("    END PRESERVE\n")
-
 def create_target() -> None:
     global outfile
+    global dither
 
     # Setup
     outfile.write("    DELAY 1\n")
@@ -255,7 +246,7 @@ def create_target() -> None:
     frame_duration = input("Enter number of hours to capture data\n")
     frame_qty = (float(frame_duration) * 3600) / timediv
     frame_qty = math.floor(frame_qty)
-    write_light_capture(frame_qty)
+    ssp_common.write_light_capture(outfile, frame_qty, dither)
     
     # Finish target
     ssp_common.stop_guiding(outfile)
