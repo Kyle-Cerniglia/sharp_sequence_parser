@@ -127,13 +127,6 @@ def init_session(
     dither = dither_val
     plate_exposure_time = plate_exposure_val
 
-def unpark() -> None:
-    global outfile
-
-    outfile.write("    DELAY 1\n")
-    outfile.write("    MOUNT UNPARK\n")
-    outfile.write("    MOUNT UNPARK\n")
-
 def set_temp() -> None:
     global temperature
 
@@ -343,7 +336,7 @@ def main() -> None:
     
     calc_capture_vals()
     
-    unpark()
+    ssp_common.unpark(outfile)
 
     create_target()
 

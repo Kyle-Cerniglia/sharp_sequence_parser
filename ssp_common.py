@@ -67,3 +67,8 @@ def start_time(outfile) -> None:
             outfile.write(
                 "    WAIT UNTIL LOCALTIME \"" + hour + ":" + minute + " PM\"\n"
             )
+
+def unpark(outfile) -> None:
+    outfile.write("    DELAY 1\n")
+    outfile.write("    MOUNT UNPARK\n")
+    outfile.write("    MOUNT UNPARK\n")
