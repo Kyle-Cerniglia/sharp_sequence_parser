@@ -72,3 +72,7 @@ def unpark(outfile) -> None:
     outfile.write("    DELAY 1\n")
     outfile.write("    MOUNT UNPARK\n")
     outfile.write("    MOUNT UNPARK\n")
+    
+def set_temp(temperature) -> None:
+    temperature = input("Set cooler temp C (100 to disable)\n")
+    return temperature

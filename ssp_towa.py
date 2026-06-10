@@ -127,11 +127,6 @@ def init_session(
     dither = dither_val
     plate_exposure_time = plate_exposure_val
 
-def set_temp() -> None:
-    global temperature
-
-    temperature = input("Set cooler temp C (100 to disable)\n")
-
 def set_telescope() -> None:
     global telescope_type
 
@@ -312,6 +307,7 @@ def shutdown() -> None:
 
 def main() -> None:
     global outfile
+    global temperature
     
     if len(sys.argv) != 1:
         print('Formatting error!')
@@ -328,7 +324,7 @@ def main() -> None:
 
     ssp_common.start_time(outfile)
     
-    set_temp()
+    temperature = ssp_common.set_temp(temperature)
     
     set_telescope()
     
