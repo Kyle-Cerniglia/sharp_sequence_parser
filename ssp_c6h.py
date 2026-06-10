@@ -193,11 +193,7 @@ def create_target() -> None:
     outfile.write("    DELAY 10\n")
 
     # Set guiding
-    outfile.write("    GUIDING CONNECT ABORT False\n")
-    outfile.write("    GUIDING STOP\n")
-    outfile.write("    DELAY 5\n")
-    outfile.write("    GUIDING START\n")
-    outfile.write("    DELAY 10\n")
+    ssp_common.start_guiding(outfile)
 
     # Set cooler temperature
     if int(temperature) != 100:

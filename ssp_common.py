@@ -84,3 +84,10 @@ def calc_capture_vals(filter_type, exposure_c, plate_c, timediv_c, dither_c) -> 
     dither = dither_c[filter_type.name].value
     
     return exposure_time, plate_exposure_time, timediv, dither
+    
+def start_guiding(outfile) -> None:
+    outfile.write("    GUIDING CONNECT ABORT False\n")
+    outfile.write("    GUIDING STOP\n")
+    outfile.write("    DELAY 5\n")
+    outfile.write("    GUIDING START\n")
+    outfile.write("    DELAY 10\n")

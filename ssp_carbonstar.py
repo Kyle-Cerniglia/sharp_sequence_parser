@@ -262,15 +262,6 @@ def run_autofocus_if_enabled() -> float:
 
     return frame_subtraction
 
-def start_guiding() -> None:
-    global outfile
-
-    outfile.write("    GUIDING CONNECT ABORT False\n")
-    outfile.write("    GUIDING STOP\n")
-    outfile.write("    DELAY 5\n")
-    outfile.write("    GUIDING START\n")
-    outfile.write("    DELAY 10\n")
-
 def stop_guiding() -> None:
     global outfile
 
@@ -346,7 +337,7 @@ def create_target() -> None:
     outfile.write("    DELAY 10\n")
 
     # Set guiding
-    start_guiding()
+    ssp_common.start_guiding(outfile)
 
     # Set cooler temperature
     cool_camera()
@@ -416,7 +407,7 @@ def create_rgb_target() -> None:
     outfile.write("    DELAY 10\n")
 
     # Set guiding
-    start_guiding()
+    ssp_common.start_guiding(outfile)
 
     # Set cooler temperature
     cool_camera()

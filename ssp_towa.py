@@ -190,15 +190,6 @@ def plate_solve() -> None:
     outfile.write("    END PRESERVE\n")
     outfile.write("    DELAY 10\n")
 
-def start_guiding() -> None:
-    global outfile
-
-    outfile.write("    GUIDING CONNECT ABORT False\n")
-    outfile.write("    GUIDING STOP\n")
-    outfile.write("    DELAY 5\n")
-    outfile.write("    GUIDING START\n")
-    outfile.write("    DELAY 20\n")
-
 def stop_guiding() -> None:
     global outfile
 
@@ -258,7 +249,7 @@ def create_target() -> None:
     outfile.write("    DELAY 20\n")
 
     # Set guiding
-    start_guiding()
+    ssp_common.start_guiding(outfile)
 
     # Set cooler temperature
     cool_camera()
