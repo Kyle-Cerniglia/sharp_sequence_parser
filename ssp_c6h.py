@@ -132,6 +132,12 @@ def write_target_name(target_name: str) -> None:
     else:
         outfile.write("    TARGETNAME \"" + target_name + "\"\n")
 
+def cool_camera() -> None:
+    global outfile
+
+    if int(temperature) != 100:
+        outfile.write("    COOL DOWN TO " + temperature + " RATE 8 TOLERANCE 1\n")
+
 def create_target() -> None:
     global outfile
     global ra_h
@@ -196,8 +202,7 @@ def create_target() -> None:
     ssp_common.start_guiding(outfile)
 
     # Set cooler temperature
-    if int(temperature) != 100:
-        outfile.write("    COOL DOWN TO " + temperature + " RATE 8 TOLERANCE 1\n")
+    cool_camera()
 
     # Set exposure
     outfile.write("    SET EXPOSURE TO " + str(exposure_time) + "\n")
