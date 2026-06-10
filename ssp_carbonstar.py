@@ -328,7 +328,7 @@ def create_target() -> None:
         target_name = catalog_search
     else:
         target_name = input("Enter target name\n")
-
+        
     write_target_name(target_name)
 
     # Slew and plate solve to a position 3 degrees off target

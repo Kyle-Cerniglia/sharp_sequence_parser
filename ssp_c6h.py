@@ -164,7 +164,7 @@ def create_target() -> None:
         target_name = catalog_search
     else:
         target_name = input("Enter target name\n")
-
+        
     write_target_name(target_name)
 
     # Platesolve and correct position

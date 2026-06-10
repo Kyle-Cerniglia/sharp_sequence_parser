@@ -125,6 +125,26 @@ def preset() -> None:
         preset_val = Presets.TOWA_NB
     outfile.write(f"    LOAD PROFILE {preset_val.value}\n")
 
+def write_target_name(target_name: str) -> None:
+    global outfile
+
+    if filter_type == Filters.LUMINANCE:
+        outfile.write("    TARGETNAME \"" + target_name + "_l\"\n")
+    elif filter_type == Filters.RED:
+        outfile.write("    TARGETNAME \"" + target_name + "_r\"\n")
+    elif filter_type == Filters.GREEN:
+        outfile.write("    TARGETNAME \"" + target_name + "_g\"\n")
+    elif filter_type == Filters.BLUE:
+        outfile.write("    TARGETNAME \"" + target_name + "_b\"\n")
+    elif filter_type == Filters.SII:
+        outfile.write("    TARGETNAME \"" + target_name + "_s\"\n")
+    elif filter_type == Filters.HA:
+        outfile.write("    TARGETNAME \"" + target_name + "_h\"\n")
+    elif filter_type == Filters.OIII:
+        outfile.write("    TARGETNAME \"" + target_name + "_o\"\n")
+    else:
+        outfile.write("    TARGETNAME \"" + target_name + "\"\n")
+
 def get_coordinates() -> tuple[str, str, str, str, str, str]:
     ra_h = input("Enter J2000 coordinates (RA h)\n")
     ra_m = input("Enter J2000 coordinates (RA m)\n")
@@ -222,7 +242,8 @@ def create_target() -> None:
 
     # Set target name
     target_name = input("Enter target name\n")
-    outfile.write("    TARGETNAME \"" + target_name + "\"\n")
+    
+    write_target_name(target_name)
 
     # Platesolve and correct position twice
     outfile.write("    WHEEL MOVE TO 1\n")
