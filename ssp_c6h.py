@@ -116,6 +116,22 @@ def preset() -> None:
         preset_val = Presets.C6H_NB
     outfile.write(f"    LOAD PROFILE \"{preset_val.value}\"\n")
 
+def write_target_name(target_name: str) -> None:
+    global outfile
+
+    if filter_type == Filters.UVIR:
+        outfile.write("    TARGETNAME \"" + target_name + "_uvir\"\n")
+    elif filter_type == Filters.LPRO:
+        outfile.write("    TARGETNAME \"" + target_name + "_lpro\"\n")
+    elif filter_type == Filters.LENHANCE:
+        outfile.write("    TARGETNAME \"" + target_name + "_lenh\"\n")
+    elif filter_type == Filters.D1:
+        outfile.write("    TARGETNAME \"" + target_name + "_d1\"\n")
+    elif filter_type == Filters.D2:
+        outfile.write("    TARGETNAME \"" + target_name + "_d2\"\n")
+    else:
+        outfile.write("    TARGETNAME \"" + target_name + "\"\n")
+
 def create_target() -> None:
     global outfile
     global ra_h
@@ -149,18 +165,7 @@ def create_target() -> None:
     else:
         target_name = input("Enter target name\n")
 
-    if filter_type == Filters.UVIR:
-        outfile.write("    TARGETNAME \"" + target_name + "_uvir\"\n")
-    elif filter_type == Filters.LPRO:
-        outfile.write("    TARGETNAME \"" + target_name + "_lpro\"\n")
-    elif filter_type == Filters.LENHANCE:
-        outfile.write("    TARGETNAME \"" + target_name + "_lenh\"\n")
-    elif filter_type == Filters.D1:
-        outfile.write("    TARGETNAME \"" + target_name + "_d1\"\n")
-    elif filter_type == Filters.D2:
-        outfile.write("    TARGETNAME \"" + target_name + "_d2\"\n")
-    else:
-        outfile.write("    TARGETNAME \"" + target_name + "\"\n")
+    write_target_name(target_name)
 
     # Platesolve and correct position
     outfile.write(
