@@ -43,17 +43,12 @@ class Timediv(Enum):
     D1 = 247
     D2 = 247
 
-# Frames per dither
-DITHER_C6_HYPER = {
-    Filters.UVIR: 24,
-    Filters.LPRO: 12,
-    Filters.LENHANCE: 8,
-    Filters.D1: 3,
-    Filters.D2: 3
-}
-DITHER = {
-    Telescope.C6_HYPER: DITHER_C6_HYPER
-}
+class Dither(Enum):
+    UVIR = 24
+    LPRO = 12
+    LENHANCE = 8
+    D1 = 3
+    D2 = 3
 
 # Local function variables
 outfile = None
@@ -133,7 +128,7 @@ def calc_capture_vals() -> None:
     exposure_time = Exposure[filter_type.name].value
     plate_exposure_time = Plate[filter_type.name].value
     timediv = Timediv[filter_type.name].value
-    dither = DITHER[telescope_type][filter_type]
+    dither = Dither[filter_type.name].value
 
 def preset() -> None:
     global outfile
