@@ -44,20 +44,15 @@ class Plate(Enum):
     OIII = 2
     NONE = 2
 
-# Time divider for frame calculation
-TIMEDIV_TOWA = {
-    Filters.LUMINANCE: 70.16,
-    Filters.RED: 70.16,
-    Filters.GREEN: 70.16,
-    Filters.BLUE: 70.16,
-    Filters.SII: 190.82,
-    Filters.HA: 190.82,
-    Filters.OIII: 190.82,
-    Filters.NONE: 70.16
-}
-TIMEDIV = {
-    Telescope.TOWA: TIMEDIV_TOWA
-}
+class Timediv(Enum):
+    LUMINANCE = 70.16
+    RED = 70.16
+    GREEN = 70.16
+    BLUE = 70.16
+    SII = 190.82
+    HA = 190.82
+    OIII = 190.82
+    NONE = 70.16
 
 # Frames per dither
 DITHER_TOWA = {
@@ -146,7 +141,7 @@ def calc_capture_vals() -> None:
 
     exposure_time = Exposure[filter_type.name].value
     plate_exposure_time = Plate[filter_type.name].value
-    timediv = TIMEDIV[telescope_type][filter_type]
+    timediv = Timediv[filter_type.name].value
     dither = DITHER[telescope_type][filter_type]
 
 def preset() -> None:

@@ -48,21 +48,16 @@ class Plate(Enum):
     NONE = 2
     RGB = 2
 
-# Time divider for frame calculation
-TIMEDIV_CARBON = {
-    Filters.LUMINANCE: 33.44,
-    Filters.RED: 33.44,
-    Filters.GREEN: 33.44,
-    Filters.BLUE: 33.44,
-    Filters.SII: 195.26,
-    Filters.HA: 195.26,
-    Filters.OIII: 195.26,
-    Filters.NONE: 33.44,
-    Filters.RGB: 33.44
-}
-TIMEDIV = {
-    Telescope.CARBON: TIMEDIV_CARBON
-}
+class Timediv(Enum):
+    LUMINANCE = 33.44
+    RED = 33.44
+    GREEN = 33.44
+    BLUE = 33.44
+    SII = 195.26
+    HA = 195.26
+    OIII = 195.26
+    NONE = 33.44
+    RGB = 33.44
 
 # Frames per dither
 DITHER_CARBON = {
@@ -173,7 +168,7 @@ def calc_capture_vals() -> None:
 
     exposure_time = Exposure[filter_type.name].value
     plate_exposure_time = Plate[filter_type.name].value
-    timediv = TIMEDIV[telescope_type][filter_type]
+    timediv = Timediv[filter_type.name].value
     dither = DITHER[telescope_type][filter_type]
 
 def preset() -> None:
