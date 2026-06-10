@@ -7,7 +7,7 @@ from enum import Enum
 from enum import auto
 import csv
 from typing import Optional
-from ssp_common import coords_direct, coords_catalog
+from ssp_common import coords_direct, coords_catalog, start_time
 
 class Telescope(Enum):
     C6_HYPER = 3
@@ -121,26 +121,6 @@ def init_session(
     timediv = timediv_val
     dither = dither_val
     plate_exposure_time = plate_exposure_val
-
-def start_time() -> None:
-    global outfile
-
-    outfile.write("SEQUENCE\n")
-    if input("Set a start time? (y/n)\n") == "y":
-        hour = input("Enter hour start (24h)\n")
-        minute = input("Enter minute start\n")
-        if int(minute) < 10:
-            minute = "0" + minute
-
-        if int(hour) < 12:
-            outfile.write(
-                "    WAIT UNTIL LOCALTIME \"" + hour + ":" + minute + " AM\"\n"
-            )
-        else:
-            hour = str(int(hour) - 12)
-            outfile.write(
-                "    WAIT UNTIL LOCALTIME \"" + hour + ":" + minute + " PM\"\n"
-            )
 
 def unpark() -> None:
     global outfile
@@ -300,6 +280,8 @@ def shutdown() -> None:
     outfile.close()
 
 def main() -> None:
+    global outfile
+    
     if len(sys.argv) != 1:
         print('Formatting error!')
         print('Example: sharp_sequence_parser.py')
@@ -313,7 +295,7 @@ def main() -> None:
 
     init_session(fileout, 100, Filters.UVIR, Telescope.C6_HYPER, 0, 0, 0, 0)
 
-    start_time()
+    start_time(outfile)
     
     set_temp()
     

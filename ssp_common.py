@@ -49,3 +49,21 @@ def coords_catalog():
         print("Catalog file not found, please enter in coordinates manually\n")
         ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used = coords_direct()
         return ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used, catalog_search
+        
+def start_time(outfile) -> None:
+    outfile.write("SEQUENCE\n")
+    if input("Set a start time? (y/n)\n") == "y":
+        hour = input("Enter hour start (24h)\n")
+        minute = input("Enter minute start\n")
+        if int(minute) < 10:
+            minute = "0" + minute
+
+        if int(hour) < 12:
+            outfile.write(
+                "    WAIT UNTIL LOCALTIME \"" + hour + ":" + minute + " AM\"\n"
+            )
+        else:
+            hour = str(int(hour) - 12)
+            outfile.write(
+                "    WAIT UNTIL LOCALTIME \"" + hour + ":" + minute + " PM\"\n"
+            )
