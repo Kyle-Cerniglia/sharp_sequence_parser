@@ -212,8 +212,9 @@ def create_target() -> None:
     outfile.write("        CAPTURE " + str(frame_qty) + " FRAMES REQUIREGUIDING True\n")
     outfile.write("        GUIDING DITHER EVERY STOP\n")
     outfile.write("    END PRESERVE\n")
-    outfile.write("    GUIDING STOP\n")
-    outfile.write("    GUIDING DISCONNECT\n\n")
+    
+    # Finish target
+    ssp_common.stop_guiding(outfile)
 
 def shutdown() -> None:
     global outfile

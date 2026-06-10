@@ -190,12 +190,6 @@ def plate_solve() -> None:
     outfile.write("    END PRESERVE\n")
     outfile.write("    DELAY 10\n")
 
-def stop_guiding() -> None:
-    global outfile
-
-    outfile.write("    GUIDING STOP\n")
-    outfile.write("    GUIDING DISCONNECT\n\n")
-
 def cool_camera() -> None:
     global outfile
 
@@ -262,7 +256,9 @@ def create_target() -> None:
     frame_qty = (float(frame_duration) * 3600) / timediv
     frame_qty = math.floor(frame_qty)
     write_light_capture(frame_qty)
-    stop_guiding()
+    
+    # Finish target
+    ssp_common.stop_guiding(outfile)
 
 def shutdown() -> None:
     global outfile

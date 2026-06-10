@@ -262,12 +262,6 @@ def run_autofocus_if_enabled() -> float:
 
     return frame_subtraction
 
-def stop_guiding() -> None:
-    global outfile
-
-    outfile.write("    GUIDING STOP\n")
-    outfile.write("    GUIDING DISCONNECT\n\n")
-
 def cool_camera() -> None:
     global outfile
 
@@ -351,7 +345,9 @@ def create_target() -> None:
     frame_qty = frame_qty - frame_subtraction
     frame_qty = math.floor(frame_qty)
     write_light_capture(frame_qty)
-    stop_guiding()
+    
+    #Finish target
+    ssp_common.stop_guiding(outfile)
 
 def create_rgb_target() -> None:
     global outfile
@@ -437,7 +433,7 @@ def create_rgb_target() -> None:
     write_light_capture(frame_qty)
 
     # Finish target
-    stop_guiding()
+    ssp_common.stop_guiding(outfile)
 
 def shutdown() -> None:
     global outfile

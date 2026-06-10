@@ -91,3 +91,7 @@ def start_guiding(outfile) -> None:
     outfile.write("    DELAY 5\n")
     outfile.write("    GUIDING START\n")
     outfile.write("    DELAY 10\n")
+    
+def stop_guiding(outfile) -> None:
+    outfile.write("    GUIDING STOP\n")
+    outfile.write("    GUIDING DISCONNECT\n\n")
