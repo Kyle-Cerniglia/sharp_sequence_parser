@@ -103,3 +103,7 @@ def write_light_capture(outfile, frame_qty: int, dither: int) -> None:
     outfile.write("        CAPTURE " + str(frame_qty) + " FRAMES REQUIREGUIDING True\n")
     outfile.write("        GUIDING DITHER EVERY STOP\n")
     outfile.write("    END PRESERVE\n")
+    
+def cool_camera(outfile, cool_c, temperature) -> None:
+    if int(temperature) != 100:
+        outfile.write("    COOL DOWN TO " + temperature + " RATE " + str(cool_c["RATE"].value) + " TOLERANCE " + str(cool_c["TOLERANCE"].value) + "\n")

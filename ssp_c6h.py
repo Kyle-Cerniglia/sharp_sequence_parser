@@ -46,6 +46,10 @@ class Dither(Enum):
     LENHANCE = 8
     D1 = 3
     D2 = 3
+    
+class Cool(Enum):
+    RATE = 8
+    TOLERANCE = 1
 
 # Local function variables
 outfile = None
@@ -132,12 +136,6 @@ def write_target_name(target_name: str) -> None:
     else:
         outfile.write("    TARGETNAME \"" + target_name + "\"\n")
 
-def cool_camera() -> None:
-    global outfile
-
-    if int(temperature) != 100:
-        outfile.write("    COOL DOWN TO " + temperature + " RATE 8 TOLERANCE 1\n")
-
 def create_target() -> None:
     global outfile
     global ra_h
@@ -149,6 +147,7 @@ def create_target() -> None:
     global catalog_used
     global catalog_search
     global dither
+    global temperature
 
     # Setup
     outfile.write("    DELAY 1\n")
@@ -203,7 +202,7 @@ def create_target() -> None:
     ssp_common.start_guiding(outfile)
 
     # Set cooler temperature
-    cool_camera()
+    ssp_common.cool_camera(outfile, Cool, temperature)
 
     # Set exposure
     outfile.write("    SET EXPOSURE TO " + str(exposure_time) + "\n")

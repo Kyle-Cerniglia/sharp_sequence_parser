@@ -60,6 +60,10 @@ class Dither(Enum):
     HA = 3
     OIII = 3
     NONE = 10
+    
+class Cool(Enum):
+    RATE = 25
+    TOLERANCE = 1
 
 # Local function variables
 outfile = None
@@ -190,15 +194,10 @@ def plate_solve() -> None:
     outfile.write("    END PRESERVE\n")
     outfile.write("    DELAY 10\n")
 
-def cool_camera() -> None:
-    global outfile
-
-    if int(temperature) != 100:
-        outfile.write("    COOL DOWN TO " + temperature + " RATE 25 TOLERANCE 1\n")
-
 def create_target() -> None:
     global outfile
     global dither
+    global temperature
 
     # Setup
     outfile.write("    DELAY 1\n")
@@ -237,7 +236,7 @@ def create_target() -> None:
     ssp_common.start_guiding(outfile)
 
     # Set cooler temperature
-    cool_camera()
+    ssp_common.cool_camera(outfile, Cool, temperature)
 
     # Set exposure
     outfile.write("    SET EXPOSURE TO " + str(exposure_time) + "\n")

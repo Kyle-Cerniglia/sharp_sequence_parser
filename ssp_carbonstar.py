@@ -66,6 +66,10 @@ class Dither(Enum):
     OIII = 3
     NONE = 20
     RGB = 20
+    
+class Cool(Enum):
+    RATE = 25
+    TOLERANCE = 1
 
 # Local function variables
 outfile = None
@@ -262,12 +266,6 @@ def run_autofocus_if_enabled() -> float:
 
     return frame_subtraction
 
-def cool_camera() -> None:
-    global outfile
-
-    if int(temperature) != 100:
-        outfile.write("    COOL DOWN TO " + temperature + " RATE 25 TOLERANCE 1\n")
-
 def create_target() -> None:
     global outfile
     global ra_h
@@ -279,6 +277,7 @@ def create_target() -> None:
     global catalog_used
     global catalog_search
     global dither
+    global temperature
 
     # Setup
     outfile.write("    DELAY 1\n")
@@ -325,7 +324,7 @@ def create_target() -> None:
     ssp_common.start_guiding(outfile)
 
     # Set cooler temperature
-    cool_camera()
+    ssp_common.cool_camera(outfile, Cool, temperature)
 
     # Set exposure
     outfile.write("    SET EXPOSURE TO " + str(exposure_time) + "\n")
@@ -351,6 +350,7 @@ def create_rgb_target() -> None:
     global catalog_used
     global catalog_search
     global dither
+    global temperature
 
     # Setup
     outfile.write("    DELAY 1\n")
@@ -398,7 +398,7 @@ def create_rgb_target() -> None:
     ssp_common.start_guiding(outfile)
 
     # Set cooler temperature
-    cool_camera()
+    ssp_common.cool_camera(outfile, Cool, temperature)
 
     # Set exposure
     outfile.write("    SET EXPOSURE TO " + str(exposure_time) + "\n")
