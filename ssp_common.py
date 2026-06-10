@@ -76,3 +76,11 @@ def unpark(outfile) -> None:
 def set_temp(temperature) -> None:
     temperature = input("Set cooler temp C (100 to disable)\n")
     return temperature
+    
+def calc_capture_vals(filter_type, exposure_c, plate_c, timediv_c, dither_c) -> None:
+    exposure_time = exposure_c[filter_type.name].value
+    plate_exposure_time = plate_c[filter_type.name].value
+    timediv = timediv_c[filter_type.name].value
+    dither = dither_c[filter_type.name].value
+    
+    return exposure_time, plate_exposure_time, timediv, dither

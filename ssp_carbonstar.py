@@ -147,17 +147,6 @@ def set_filter() -> None:
     else:
         rgb_flag = False
 
-def calc_capture_vals() -> None:
-    global exposure_time
-    global plate_exposure_time
-    global timediv
-    global dither
-
-    exposure_time = Exposure[filter_type.name].value
-    plate_exposure_time = Plate[filter_type.name].value
-    timediv = Timediv[filter_type.name].value
-    dither = Dither[filter_type.name].value
-
 def preset() -> None:
     global outfile
 
@@ -477,6 +466,10 @@ def main() -> None:
     global rgb_flag
     global outfile
     global temperature
+    global exposure_time
+    global plate_exposure_time
+    global timediv
+    global dither
     
     if len(sys.argv) != 1:
         print('Formatting error!')
@@ -497,7 +490,7 @@ def main() -> None:
     
     set_filter()
     
-    calc_capture_vals()
+    exposure_time, plate_exposure_time, timediv, dither = ssp_common.calc_capture_vals(filter_type, Exposure, Plate, Timediv, Dither)
     
     ssp_common.unpark(outfile)
 
