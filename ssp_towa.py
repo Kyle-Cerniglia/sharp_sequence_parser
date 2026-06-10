@@ -1,4 +1,5 @@
 # Parser for the sharpcap sequencer
+# Designed for a Minicam8M mounted to a Towa 339
 
 import sys
 import math

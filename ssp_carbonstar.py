@@ -1,11 +1,10 @@
 # Parser for the sharpcap sequencer
-# Designed for an Minicam8M mounted to a Carbonstar 150
+# Designed for a Minicam8M mounted to a Carbonstar 150
 
 import sys
 import math
 from enum import Enum
 from enum import auto
-import csv
 from typing import Optional
 import ssp_common
 

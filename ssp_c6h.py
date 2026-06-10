@@ -5,7 +5,6 @@ import sys
 import math
 from enum import Enum
 from enum import auto
-import csv
 from typing import Optional
 import ssp_common
 
