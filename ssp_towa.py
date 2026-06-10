@@ -296,7 +296,7 @@ def main() -> None:
     #Insert additional targets
     while input("Enter additional target? (y/n)") == 'y':
         set_filter()
-        calc_capture_vals()
+        exposure_time, plate_exposure_time, timediv, dither = ssp_common.calc_capture_vals(filter_type, Exposure, Plate, Timediv, Dither)
         create_target()
 
     shutdown()

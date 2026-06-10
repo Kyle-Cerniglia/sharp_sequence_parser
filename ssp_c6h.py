@@ -59,12 +59,6 @@ exposure_time = None
 timediv = None
 dither = None
 plate_exposure_time = None
-ra_h = ""
-ra_m = ""
-ra_s = ""
-dec_d = ""
-dec_m = ""
-dec_s = ""
 catalog_search = ""
 catalog_used = False
 
@@ -138,12 +132,6 @@ def write_target_name(target_name: str) -> None:
 
 def create_target() -> None:
     global outfile
-    global ra_h
-    global ra_m
-    global ra_s
-    global dec_d
-    global dec_m
-    global dec_s
     global catalog_used
     global catalog_search
     global dither

@@ -81,12 +81,6 @@ dither = None
 plate_exposure_time = None
 rough_focus = None
 rgb_flag = False
-ra_h = ""
-ra_m = ""
-ra_s = ""
-dec_d = ""
-dec_m = ""
-dec_s = ""
 catalog_search = ""
 catalog_used = False
 
@@ -183,7 +177,7 @@ def write_target_name(target_name: str) -> None:
     else:
         outfile.write("    TARGETNAME \"" + target_name + "\"\n")
 
-def rough_plate_solve() -> None:
+def rough_plate_solve(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s) -> None:
     global outfile
 
     dec_d_offset = int(dec_d)
@@ -218,7 +212,7 @@ def rough_plate_solve() -> None:
     outfile.write("    END PRESERVE\n")
     outfile.write("    DELAY 10\n")
 
-def centered_plate_solve() -> None:
+def centered_plate_solve(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s) -> None:
     global outfile
 
     outfile.write("    WHEEL MOVE TO 1\n")
@@ -268,12 +262,6 @@ def run_autofocus_if_enabled() -> float:
 
 def create_target() -> None:
     global outfile
-    global ra_h
-    global ra_m
-    global ra_s
-    global dec_d
-    global dec_m
-    global dec_s
     global catalog_used
     global catalog_search
     global dither
@@ -307,11 +295,11 @@ def create_target() -> None:
     write_target_name(target_name)
 
     # Slew and plate solve to a position 3 degrees off target
-    rough_plate_solve()
+    rough_plate_solve(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
 
     # Platesolve and correct position twice
-    centered_plate_solve()
-    centered_plate_solve()
+    centered_plate_solve(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
+    centered_plate_solve(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
 
     # Autofocus
     frame_subtraction = run_autofocus_if_enabled()
@@ -341,12 +329,6 @@ def create_target() -> None:
 
 def create_rgb_target() -> None:
     global outfile
-    global ra_h
-    global ra_m
-    global ra_s
-    global dec_d
-    global dec_m
-    global dec_s
     global catalog_used
     global catalog_search
     global dither
@@ -381,11 +363,11 @@ def create_rgb_target() -> None:
     outfile.write("    TARGETNAME \"" + target_name + "_r\"\n")
 
     # Slew and plate solve to a position 3 degrees off target
-    rough_plate_solve()
+    rough_plate_solve(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
 
     # Platesolve and correct position twice
-    centered_plate_solve()
-    centered_plate_solve()
+    centered_plate_solve(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
+    centered_plate_solve(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
 
     # Autofocus
     frame_subtraction = run_autofocus_if_enabled()
@@ -477,7 +459,7 @@ def main() -> None:
     #Insert additional targets
     while input("Enter additional target? (y/n)") == 'y':
         set_filter()
-        calc_capture_vals()
+        exposure_time, plate_exposure_time, timediv, dither = ssp_common.calc_capture_vals(filter_type, Exposure, Plate, Timediv, Dither)
         if (rgb_flag == True):
             create_rgb_target()
         else:
