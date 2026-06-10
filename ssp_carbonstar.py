@@ -91,16 +91,6 @@ DITHER = {
     Telescope.CARBON: DITHER_CARBON
 }
 
-rgb_flag = False
-ra_h = ""
-ra_m = ""
-ra_s = ""
-dec_d = ""
-dec_m = ""
-dec_s = ""
-catalog_search = ""
-catalog_used = False
-
 # Local function variables
 outfile = None
 temperature = None
@@ -112,6 +102,14 @@ dither = None
 plate_exposure_time = None
 rough_focus = None
 rgb_flag = False
+ra_h = ""
+ra_m = ""
+ra_s = ""
+dec_d = ""
+dec_m = ""
+dec_s = ""
+catalog_search = ""
+catalog_used = False
 
 def init_session(
     out_file,
@@ -373,6 +371,14 @@ def write_light_capture(frame_qty: int) -> None:
 
 def create_target() -> None:
     global outfile
+    global ra_h
+    global ra_m
+    global ra_s
+    global dec_d
+    global dec_m
+    global dec_s
+    global catalog_used
+    global catalog_search
 
     # Setup
     outfile.write("    DELAY 1\n")
@@ -434,6 +440,14 @@ def create_target() -> None:
 
 def create_rgb_target() -> None:
     global outfile
+    global ra_h
+    global ra_m
+    global ra_s
+    global dec_d
+    global dec_m
+    global dec_s
+    global catalog_used
+    global catalog_search
 
     # Setup
     outfile.write("    DELAY 1\n")
@@ -521,6 +535,8 @@ def shutdown() -> None:
     outfile.close()
 
 def main() -> None:
+    global rgb_flag
+    
     if len(sys.argv) != 1:
         print('Formatting error!')
         print('Example: ssp_towa.py')
