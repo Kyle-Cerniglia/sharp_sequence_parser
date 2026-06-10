@@ -4,7 +4,7 @@ import sys
 import math
 from enum import Enum
 from enum import auto
-from ssp_common import start_time
+import ssp_common
 
 class Telescope(Enum):
     TOWA = 2
@@ -332,7 +332,7 @@ def main() -> None:
 
     init_session(fileout, 100, Filters.LUMINANCE, Telescope.TOWA, 0, 0, 0, 0)
 
-    start_time(outfile)
+    ssp_common.start_time(outfile)
     
     set_temp()
     

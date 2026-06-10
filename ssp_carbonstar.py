@@ -7,7 +7,7 @@ from enum import Enum
 from enum import auto
 import csv
 from typing import Optional
-from ssp_common import coords_direct, coords_catalog, start_time
+import ssp_common
 
 class Telescope(Enum):
     CARBON = 2
@@ -375,9 +375,9 @@ def create_target() -> None:
 
     # Configure target
     if input("Lookup catalog target? (y/n)\n") == "y":
-        ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used, catalog_search = coords_catalog()
+        ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used, catalog_search = ssp_common.coords_catalog()
     else:
-        ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used = coords_direct()
+        ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used = ssp_common.coords_direct()
 
     # Set target name
     if catalog_used:
@@ -444,9 +444,9 @@ def create_rgb_target() -> None:
 
     # Configure target
     if input("Lookup catalog target? (y/n)\n") == "y":
-        ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used, catalog_search = coords_catalog()
+        ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used, catalog_search = ssp_common.coords_catalog()
     else:
-        ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used = coords_direct()
+        ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used = ssp_common.coords_direct()
 
     # Set target name
     if catalog_used:
@@ -531,7 +531,7 @@ def main() -> None:
 
     init_session(fileout, 100, Filters.LUMINANCE, Telescope.CARBON, 0, 0, 0, 0, -1)
 
-    start_time(outfile)
+    ssp_common.start_time(outfile)
     
     set_temp()
     
