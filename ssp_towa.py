@@ -68,7 +68,6 @@ class Dither(Enum):
 outfile = None
 temperature = None
 filter_type = None
-telescope_type = None
 exposure_time = None
 timediv = None
 dither = None
@@ -92,7 +91,6 @@ def init_session(
     global outfile
     global temperature
     global filter_type
-    global telescope_type
     global exposure_time
     global timediv
     global dither
@@ -101,16 +99,10 @@ def init_session(
     outfile = out_file
     temperature = temp
     filter_type = filter_val
-    telescope_type = telescope_val
     exposure_time = exposure_val
     timediv = timediv_val
     dither = dither_val
     plate_exposure_time = plate_exposure_val
-
-def set_telescope() -> None:
-    global telescope_type
-
-    telescope_type = Telescope(1)
 
 def set_filter() -> None:
     global filter_type
@@ -305,8 +297,6 @@ def main() -> None:
     ssp_common.start_time(outfile)
     
     temperature = ssp_common.set_temp(temperature)
-    
-    set_telescope()
     
     set_filter()
     
