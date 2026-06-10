@@ -342,7 +342,7 @@ def create_target() -> None:
     # Set frame capture
     frame_duration = input("Enter number of hours to capture data\n")
     frame_qty = (float(frame_duration) * 3600) / timediv
-    frame_qty = frame_qty - frame_subtraction
+    frame_qty = frame_qty - frame_subtraction # Autocal time
     frame_qty = math.floor(frame_qty)
     write_light_capture(frame_qty)
     
