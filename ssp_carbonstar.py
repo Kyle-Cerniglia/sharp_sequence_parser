@@ -37,21 +37,16 @@ class Exposure(Enum):
     NONE = 2
     RGB = 30
 
-# Platesolving exposure time
-PLATE_EXPOSURE_CARBON = {
-    Filters.LUMINANCE: 2,
-    Filters.RED: 2,
-    Filters.GREEN: 2,
-    Filters.BLUE: 2,
-    Filters.SII: 2,
-    Filters.HA: 2,
-    Filters.OIII: 2,
-    Filters.NONE: 2,
-    Filters.RGB: 2
-}
-PLATE_EXPOSURE = {
-    Telescope.CARBON: PLATE_EXPOSURE_CARBON
-}
+class Plate(Enum):
+    LUMINANCE = 2
+    RED = 2
+    GREEN = 2
+    BLUE = 2
+    SII = 2
+    HA = 2
+    OIII = 2
+    NONE = 2
+    RGB = 2
 
 # Time divider for frame calculation
 TIMEDIV_CARBON = {
@@ -177,7 +172,7 @@ def calc_capture_vals() -> None:
     global dither
 
     exposure_time = Exposure[filter_type.name].value
-    plate_exposure_time = PLATE_EXPOSURE[telescope_type][filter_type]
+    plate_exposure_time = Plate[filter_type.name].value
     timediv = TIMEDIV[telescope_type][filter_type]
     dither = DITHER[telescope_type][filter_type]
 

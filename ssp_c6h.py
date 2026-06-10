@@ -29,17 +29,12 @@ class Exposure(Enum):
     D1 = 240
     D2 = 240
 
-# Platesolving exposure time
-PLATE_EXPOSURE_C6_HYPER = {
-    Filters.UVIR: 1,
-    Filters.LPRO: 1,
-    Filters.LENHANCE: 2,
-    Filters.D1: 8,
-    Filters.D2: 8
-}
-PLATE_EXPOSURE = {
-    Telescope.C6_HYPER: PLATE_EXPOSURE_C6_HYPER
-}
+class Plate(Enum):
+    UVIR = 1
+    LPRO = 1
+    LENHANCE = 2
+    D1 = 8
+    D2 = 8
 
 # Time divider for frame calculation
 TIMEDIV_C6_HYPER = {
@@ -141,7 +136,7 @@ def calc_capture_vals() -> None:
     global dither
 
     exposure_time = Exposure[filter_type.name].value
-    plate_exposure_time = PLATE_EXPOSURE[telescope_type][filter_type]
+    plate_exposure_time = Plate[filter_type.name].value
     timediv = TIMEDIV[telescope_type][filter_type]
     dither = DITHER[telescope_type][filter_type]
 
