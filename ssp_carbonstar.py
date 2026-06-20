@@ -218,8 +218,7 @@ def create_target() -> None:
         frame_subtraction = ssp_common.run_autofocus(outfile, rough_focus, frame_subtraction, exposure_time)
 
     # Set filter
-    outfile.write("    WHEEL MOVE TO " + str(filter_type.value) + "\n")
-    outfile.write("    DELAY 10\n")
+    ssp_common.set_filter(outfile, filter_type.value)
 
     # Set guiding
     ssp_common.start_guiding(outfile)

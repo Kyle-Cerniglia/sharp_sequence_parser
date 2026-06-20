@@ -181,3 +181,7 @@ def set_format(outfile, mono) -> None:
     
 def connect_mount(outfile) -> None:
     outfile.write("    MOUNT CONNECT\n")
+    
+def set_filter(outfile, filter_number) -> None:
+    outfile.write("    WHEEL MOVE TO " + str(filter_number) + "\n")
+    outfile.write("    DELAY 10\n")

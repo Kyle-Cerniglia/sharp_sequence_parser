@@ -179,8 +179,7 @@ def create_target() -> None:
     ssp_common.goto_plate_solve(outfile, 0, 2, True, ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
 
     # Set filter
-    outfile.write("    WHEEL MOVE TO " + str(filter_type.value) + "\n")
-    outfile.write("    DELAY 20\n")
+    ssp_common.set_filter(outfile, filter_type.value)
 
     # Set guiding
     ssp_common.start_guiding(outfile)
