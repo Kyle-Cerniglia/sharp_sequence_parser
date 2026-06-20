@@ -272,7 +272,7 @@ def create_target() -> None:
     outfile.write("    MOUNT CONNECT\n")
 
     # Configure autofocus
-    rough_focus = ssp_common.autofocus()
+    rough_focus = ssp_common.set_autofocus()
 
     # Configure target
     if input("Lookup catalog target? (y/n)\n") == "y":
@@ -340,7 +340,7 @@ def create_rgb_target() -> None:
     outfile.write("    MOUNT CONNECT\n")
 
     # Configure autofocus
-    rough_focus = ssp_common.autofocus()
+    rough_focus = ssp_common.set_autofocus()
 
     # Configure target
     if input("Lookup catalog target? (y/n)\n") == "y":
