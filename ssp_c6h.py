@@ -170,7 +170,7 @@ def create_target() -> None:
     ssp_common.cool_camera(outfile, Cool, temperature)
 
     # Set exposure
-    outfile.write("    SET EXPOSURE TO " + str(exposure_time) + "\n")
+    ssp_common.set_exposure(outfile, exposure_time)
 
     # Set frame capture
     frame_duration = input("Enter number of hours to capture data\n")

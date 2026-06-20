@@ -227,7 +227,7 @@ def create_target() -> None:
     ssp_common.cool_camera(outfile, Cool, temperature)
 
     # Set exposure
-    outfile.write("    SET EXPOSURE TO " + str(exposure_time) + "\n")
+    ssp_common.set_exposure(outfile, exposure_time)
 
     # Set frame capture
     frame_duration = input("Enter number of hours to capture data\n")
@@ -292,8 +292,7 @@ def create_rgb_target() -> None:
         frame_subtraction = ssp_common.run_autofocus(outfile, rough_focus, frame_subtraction, exposure_time)
 
     # Set RED filter
-    outfile.write("    WHEEL MOVE TO " + str(Filters.RED.value) + "\n")
-    outfile.write("    DELAY 10\n")
+    ssp_common.set_filter(outfile, Filters.RED.value)
 
     # Set guiding
     ssp_common.start_guiding(outfile)
@@ -302,7 +301,7 @@ def create_rgb_target() -> None:
     ssp_common.cool_camera(outfile, Cool, temperature)
 
     # Set exposure
-    outfile.write("    SET EXPOSURE TO " + str(exposure_time) + "\n")
+    ssp_common.set_exposure(outfile, exposure_time)
 
     frame_duration = input("Enter number of hours to capture data\n")
     frame_qty = (float(frame_duration) * 3600) / timediv
@@ -315,14 +314,12 @@ def create_rgb_target() -> None:
 
     # Capture GREEN
     outfile.write("    TARGETNAME \"" + target_name + "_g\"\n")
-    outfile.write("    WHEEL MOVE TO " + str(Filters.GREEN.value) + "\n")
-    outfile.write("    DELAY 10\n")
+    ssp_common.set_filter(outfile, Filters.GREEN.value)
     ssp_common.write_light_capture(outfile, frame_qty, dither)
 
     # Capture BLUE
     outfile.write("    TARGETNAME \"" + target_name + "_b\"\n")
-    outfile.write("    WHEEL MOVE TO " + str(Filters.BLUE.value) + "\n")
-    outfile.write("    DELAY 10\n")
+    ssp_common.set_filter(outfile, Filters.BLUE.value)
     ssp_common.write_light_capture(outfile, frame_qty, dither)
 
     # Finish target
