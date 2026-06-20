@@ -180,6 +180,7 @@ def create_target() -> None:
     global temperature
     global rough_focus
     global exposure_time
+    global timediv
 
     # Configure image formatting
     ssp_common.set_format(outfile, True)
@@ -232,10 +233,7 @@ def create_target() -> None:
     ssp_common.set_exposure(outfile, exposure_time)
 
     # Set frame capture
-    frame_duration = input("Enter number of hours to capture data\n")
-    frame_qty = (float(frame_duration) * 3600) / timediv
-    frame_qty = frame_qty - frame_subtraction # Autocal time
-    frame_qty = math.floor(frame_qty)
+    frame_qty = ssp_common.frame_calc(outfile, timediv, frame_subtraction, 1)
     ssp_common.write_light_capture(outfile, frame_qty, dither)
     
     #Finish target
@@ -249,6 +247,7 @@ def create_rgb_target() -> None:
     global temperature
     global rough_focus
     global exposure_time
+    global timediv
 
     # Setup
     outfile.write("    DELAY 1\n")
@@ -305,11 +304,8 @@ def create_rgb_target() -> None:
     # Set exposure
     ssp_common.set_exposure(outfile, exposure_time)
 
-    frame_duration = input("Enter number of hours to capture data\n")
-    frame_qty = (float(frame_duration) * 3600) / timediv
-    frame_qty = frame_qty - frame_subtraction
-    frame_qty = frame_qty / 3
-    frame_qty = math.floor(frame_qty)
+    # Calculate frames
+    frame_qty = ssp_common.frame_calc(outfile, timediv, frame_subtraction, 3)
 
     # Capture RED
     ssp_common.write_light_capture(outfile, frame_qty, dither)

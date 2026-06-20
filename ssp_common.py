@@ -1,5 +1,6 @@
 from pathlib import Path
 import csv
+import math
 
 master_catalog = Path("catalogs") / "master.csv"
 list_catalog = Path("catalogs") / "available_catalogs.txt"
@@ -191,3 +192,11 @@ def set_exposure(outfile, exposure) -> None:
     
 def write_target_name(outfile, name, suffix) -> None:
     outfile.write("    TARGETNAME \"" + name + "_" + suffix + "\"\n")
+    
+def frame_calc(outfile, timediv, autofocus, div):
+    frame_duration = input("Enter number of hours to capture data\n")
+    frame_qty = (float(frame_duration) * 3600) / timediv
+    frame_qty = frame_qty - autofocus
+    frame_qty = frame_qty / div
+    frame_qty = math.floor(frame_qty)
+    return frame_qty

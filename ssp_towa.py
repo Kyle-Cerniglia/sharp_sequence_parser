@@ -193,9 +193,7 @@ def create_target() -> None:
     ssp_common.set_exposure(outfile, exposure_time)
 
     # Set frame capture
-    frame_duration = input("Enter number of hours to capture data\n")
-    frame_qty = (float(frame_duration) * 3600) / timediv
-    frame_qty = math.floor(frame_qty)
+    frame_qty = ssp_common.frame_calc(outfile, timediv, frame_subtraction, 1)
     ssp_common.write_light_capture(outfile, frame_qty, dither)
     
     # Finish target
