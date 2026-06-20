@@ -188,3 +188,6 @@ def set_filter(outfile, filter_number) -> None:
     
 def set_exposure(outfile, exposure) -> None:
     outfile.write("    SET EXPOSURE TO " + str(exposure) + "\n")
+    
+def write_target_name(outfile, name, suffix) -> None:
+    outfile.write("    TARGETNAME \"" + name + "_" + suffix + "\"\n")

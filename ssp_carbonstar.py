@@ -143,6 +143,7 @@ def set_filter() -> None:
 
 def preset() -> None:
     global outfile
+    global filter_type
 
     if filter_type in [Filters.LUMINANCE, Filters.RED, Filters.GREEN, Filters.BLUE]:
         preset_val = Presets.CARBON_LRGB
@@ -152,23 +153,24 @@ def preset() -> None:
 
 def identify_target_name(target_name: str) -> None:
     global outfile
+    global filter_type
 
     if filter_type == Filters.LUMINANCE:
-        outfile.write("    TARGETNAME \"" + target_name + "_l\"\n")
+        ssp_common.write_target_name(outfile, target_name, "l")
     elif filter_type == Filters.RED:
-        outfile.write("    TARGETNAME \"" + target_name + "_r\"\n")
+        ssp_common.write_target_name(outfile, target_name, "r")
     elif filter_type == Filters.GREEN:
-        outfile.write("    TARGETNAME \"" + target_name + "_g\"\n")
+        ssp_common.write_target_name(outfile, target_name, "g")
     elif filter_type == Filters.BLUE:
-        outfile.write("    TARGETNAME \"" + target_name + "_b\"\n")
+        ssp_common.write_target_name(outfile, target_name, "b")
     elif filter_type == Filters.SII:
-        outfile.write("    TARGETNAME \"" + target_name + "_s\"\n")
+        ssp_common.write_target_name(outfile, target_name, "s")
     elif filter_type == Filters.HA:
-        outfile.write("    TARGETNAME \"" + target_name + "_h\"\n")
+        ssp_common.write_target_name(outfile, target_name, "h")
     elif filter_type == Filters.OIII:
-        outfile.write("    TARGETNAME \"" + target_name + "_o\"\n")
+        ssp_common.write_target_name(outfile, target_name, "o")
     else:
-        outfile.write("    TARGETNAME \"" + target_name + "\"\n")
+        ssp_common.write_target_name(outfile, target_name, "")
 
 def create_target() -> None:
     global outfile
@@ -277,14 +279,14 @@ def create_rgb_target() -> None:
         target_name = input("Enter RGB target name\n")
 
     # Image RED
-    outfile.write("    TARGETNAME \"" + target_name + "_r\"\n")
+    ssp_common.write_target_name(outfile, target_name, "r")
 
     # Slew and plate solve to a position 3 degrees off target
-    goto_plate_solve(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
+    ssp_common.goto_plate_solve(outfile, 3, 2, True, ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
 
     # Platesolve and correct position twice
-    goto_plate_solve(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
-    goto_plate_solve(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
+    ssp_common.goto_plate_solve(outfile, 0, 2, True, ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
+    ssp_common.goto_plate_solve(outfile, 0, 2, True, ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
 
     # Autofocus
     frame_subtraction = 0
@@ -313,12 +315,12 @@ def create_rgb_target() -> None:
     ssp_common.write_light_capture(outfile, frame_qty, dither)
 
     # Capture GREEN
-    outfile.write("    TARGETNAME \"" + target_name + "_g\"\n")
+    ssp_common.write_target_name(outfile, target_name, "g")
     ssp_common.set_filter(outfile, Filters.GREEN.value)
     ssp_common.write_light_capture(outfile, frame_qty, dither)
 
     # Capture BLUE
-    outfile.write("    TARGETNAME \"" + target_name + "_b\"\n")
+    ssp_common.write_target_name(outfile, target_name, "b")
     ssp_common.set_filter(outfile, Filters.BLUE.value)
     ssp_common.write_light_capture(outfile, frame_qty, dither)
 

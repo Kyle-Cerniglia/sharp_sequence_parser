@@ -107,6 +107,7 @@ def set_filter() -> None:
 
 def preset() -> None:
     global outfile
+    global filter_type
 
     if filter_type in [Filters.UVIR, Filters.LENHANCE, Filters.LPRO]:
         preset_val = Presets.C6H_OSC
@@ -116,19 +117,20 @@ def preset() -> None:
 
 def identify_target_name(target_name: str) -> None:
     global outfile
+    global filter_type
 
     if filter_type == Filters.UVIR:
-        outfile.write("    TARGETNAME \"" + target_name + "_uvir\"\n")
+        ssp_common.write_target_name(outfile, target_name, "uvir")
     elif filter_type == Filters.LPRO:
-        outfile.write("    TARGETNAME \"" + target_name + "_lpro\"\n")
+        ssp_common.write_target_name(outfile, target_name, "lpro")
     elif filter_type == Filters.LENHANCE:
-        outfile.write("    TARGETNAME \"" + target_name + "_lenh\"\n")
+        ssp_common.write_target_name(outfile, target_name, "lenh")
     elif filter_type == Filters.D1:
-        outfile.write("    TARGETNAME \"" + target_name + "_d1\"\n")
+        ossp_common.write_target_name(outfile, target_name, "d1")
     elif filter_type == Filters.D2:
-        outfile.write("    TARGETNAME \"" + target_name + "_d2\"\n")
+        ssp_common.write_target_name(outfile, target_name, "d2")
     else:
-        outfile.write("    TARGETNAME \"" + target_name + "\"\n")
+        ssp_common.write_target_name(outfile, target_name, "")
 
 def create_target() -> None:
     global outfile
