@@ -169,3 +169,10 @@ def goto_plate_solve(outfile, offset, exposure, wheel, ra_h, ra_m, ra_s, dec_d, 
     outfile.write("        MOUNT SOLVEANDSYNC\n")
     outfile.write("    END PRESERVE\n")
     outfile.write("    DELAY 10\n")
+    
+def set_format(outfile, mono) -> None:
+    if mono == True:
+        outfile.write("    SET COLOUR SPACE TO MONO16\n")
+    else:
+        outfile.write("    SET COLOUR SPACE TO RAW16\n")
+    outfile.write("    SET OUTPUT FORMAT TO \"FITS files (*.fits)\"\n")

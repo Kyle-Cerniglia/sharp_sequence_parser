@@ -184,9 +184,10 @@ def create_target() -> None:
     outfile.write("    STILL MODE\n")
 
     # Configure image formatting
-    outfile.write("    SET COLOUR SPACE TO MONO16\n")
-    outfile.write("    SET OUTPUT FORMAT TO \"FITS files (*.fits)\"\n")
+    ssp_common.set_format(outfile, True)
+    
     preset()
+    
     outfile.write("    MOUNT CONNECT\n")
 
     # Configure autofocus
@@ -255,9 +256,10 @@ def create_rgb_target() -> None:
     outfile.write("    STILL MODE\n")
 
     # Configure image formatting
-    outfile.write("    SET COLOUR SPACE TO MONO16\n")
-    outfile.write("    SET OUTPUT FORMAT TO \"FITS files (*.fits)\"\n")
+    ssp_common.set_format(outfile, True)
+    
     preset()
+    
     outfile.write("    MOUNT CONNECT\n")
 
     # Configure autofocus

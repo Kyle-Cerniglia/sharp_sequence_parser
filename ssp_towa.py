@@ -159,9 +159,11 @@ def create_target() -> None:
     outfile.write("    STILL MODE\n")
 
     # Configure image formatting
-    outfile.write("    SET COLOUR SPACE TO MONO16\n")
-    outfile.write("    SET OUTPUT FORMAT TO \"FITS files (*.fits)\"\n")
+    ssp_common.set_format(outfile, True)
+    
+    # Configure sharpcap preset
     preset()
+    
     outfile.write("    MOUNT CONNECT\n")
 
     # Configure target coordinates
