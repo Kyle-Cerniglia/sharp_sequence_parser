@@ -409,16 +409,6 @@ def create_rgb_target() -> None:
     # Finish target
     ssp_common.stop_guiding(outfile)
 
-def shutdown() -> None:
-    global outfile
-
-    outfile.write("    MOUNT PARK\n")
-    if int(temperature) != 100:
-        outfile.write("    SET COOLER OFF\n")
-    outfile.write("    WHEEL MOVE TO 1\n")
-    outfile.write("END SEQUENCE\n")
-    outfile.close()
-
 def main() -> None:
     global rgb_flag
     global outfile
@@ -465,7 +455,7 @@ def main() -> None:
         else:
             create_target()
 
-    shutdown()
+    ssp_common.shutdown(outfile, True, temperature)
 
     print("Sequence file generated!\n")
 

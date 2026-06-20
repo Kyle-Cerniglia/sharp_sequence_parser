@@ -250,16 +250,6 @@ def create_target() -> None:
     # Finish target
     ssp_common.stop_guiding(outfile)
 
-def shutdown() -> None:
-    global outfile
-
-    outfile.write("    MOUNT PARK\n")
-    if int(temperature) != 100:
-        outfile.write("    SET COOLER OFF\n")
-    outfile.write("    WHEEL MOVE TO 1\n")
-    outfile.write("END SEQUENCE\n")
-    outfile.close()
-
 def main() -> None:
     global outfile
     global temperature
@@ -299,7 +289,7 @@ def main() -> None:
         exposure_time, plate_exposure_time, timediv, dither = ssp_common.calc_capture_vals(filter_type, Exposure, Plate, Timediv, Dither)
         create_target()
 
-    shutdown()
+    ssp_common.shutdown(outfile, True, temperature)
 
     print("Sequence file generated!\n")
 

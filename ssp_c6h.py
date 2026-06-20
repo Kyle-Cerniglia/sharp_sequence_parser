@@ -204,15 +204,6 @@ def create_target() -> None:
     # Finish target
     ssp_common.stop_guiding(outfile)
 
-def shutdown() -> None:
-    global outfile
-    
-    outfile.write("    MOUNT PARK\n")
-    if int(temperature) != 100:
-        outfile.write("    SET COOLER OFF\n")
-    outfile.write("END SEQUENCE\n")
-    outfile.close()
-
 def main() -> None:
     global outfile
     global temperature
@@ -250,7 +241,7 @@ def main() -> None:
     while input("Enter additional target? (y/n)") == 'y':
         create_target()
 
-    shutdown()
+    ssp_common.shutdown(outfile, False, temperature)
 
     print("Sequence file generated!\n")
 

@@ -107,3 +107,12 @@ def write_light_capture(outfile, frame_qty: int, dither: int) -> None:
 def cool_camera(outfile, cool_c, temperature) -> None:
     if int(temperature) != 100:
         outfile.write("    COOL DOWN TO " + temperature + " RATE " + str(cool_c["RATE"].value) + " TOLERANCE " + str(cool_c["TOLERANCE"].value) + "\n")
+        
+def shutdown(outfile, wheel, temperature) -> None:
+    outfile.write("    MOUNT PARK\n")
+    if int(temperature) != 100:
+        outfile.write("    SET COOLER OFF\n")
+    if wheel == True:
+        outfile.write("    WHEEL MOVE TO 1\n")
+    outfile.write("END SEQUENCE\n")
+    outfile.close()
