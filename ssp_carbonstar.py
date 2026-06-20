@@ -170,69 +170,6 @@ def write_target_name(target_name: str) -> None:
     else:
         outfile.write("    TARGETNAME \"" + target_name + "\"\n")
 
-def rough_plate_solve(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s) -> None:
-    global outfile
-
-    dec_d_offset = int(dec_d)
-
-    if dec_d_offset > 85:
-        dec_d_offset = dec_d_offset - 3
-    else:
-        dec_d_offset = dec_d_offset + 3
-
-    outfile.write("    WHEEL MOVE TO 1\n")
-    outfile.write("    DELAY 10\n")
-    outfile.write(
-        "    MOUNT GOTO \""
-        + ra_h
-        + " "
-        + ra_m
-        + " "
-        + ra_s
-        + ", "
-        + str(dec_d_offset)
-        + " "
-        + dec_m
-        + " "
-        + dec_s
-        + "\"\n"
-    )
-    outfile.write("    DELAY 10\n")
-    outfile.write("    PRESERVE CAMERA SETTINGS\n")
-    outfile.write("        SET EXPOSURE TO 2\n")
-    outfile.write("        SET GAIN TO 100\n")
-    outfile.write("        MOUNT SOLVEANDSYNC\n")
-    outfile.write("    END PRESERVE\n")
-    outfile.write("    DELAY 10\n")
-
-def centered_plate_solve(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s) -> None:
-    global outfile
-
-    outfile.write("    WHEEL MOVE TO 1\n")
-    outfile.write("    DELAY 10\n")
-    outfile.write(
-        "    MOUNT GOTO \""
-        + ra_h
-        + " "
-        + ra_m
-        + " "
-        + ra_s
-        + ", "
-        + dec_d
-        + " "
-        + dec_m
-        + " "
-        + dec_s
-        + "\"\n"
-    )
-    outfile.write("    DELAY 10\n")
-    outfile.write("    PRESERVE CAMERA SETTINGS\n")
-    outfile.write("        SET EXPOSURE TO 2\n")
-    outfile.write("        SET GAIN TO 100\n")
-    outfile.write("        MOUNT SOLVEANDSYNC\n")
-    outfile.write("    END PRESERVE\n")
-    outfile.write("    DELAY 10\n")
-
 def create_target() -> None:
     global outfile
     global catalog_used
@@ -270,11 +207,11 @@ def create_target() -> None:
     write_target_name(target_name)
 
     # Slew and plate solve to a position 3 degrees off target
-    rough_plate_solve(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
+    ssp_common.goto_plate_solve(outfile, 3, 2, True, ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
 
     # Platesolve and correct position twice
-    centered_plate_solve(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
-    centered_plate_solve(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
+    ssp_common.goto_plate_solve(outfile, 0, 2, True, ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
+    ssp_common.goto_plate_solve(outfile, 0, 2, True, ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
 
     # Autofocus
     frame_subtraction = 0
@@ -342,11 +279,11 @@ def create_rgb_target() -> None:
     outfile.write("    TARGETNAME \"" + target_name + "_r\"\n")
 
     # Slew and plate solve to a position 3 degrees off target
-    rough_plate_solve(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
+    goto_plate_solve(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
 
     # Platesolve and correct position twice
-    centered_plate_solve(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
-    centered_plate_solve(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
+    goto_plate_solve(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
+    goto_plate_solve(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
 
     # Autofocus
     frame_subtraction = 0

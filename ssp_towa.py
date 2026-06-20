@@ -158,42 +158,6 @@ def get_coordinates() -> tuple[str, str, str, str, str, str]:
     dec_s = input("Enter J2000 coordinates (DEC s)\n")
     return ra_h, ra_m, ra_s, dec_d, dec_m, dec_s
 
-def write_mount_goto(
-    ra_h: str,
-    ra_m: str,
-    ra_s: str,
-    dec_d: str,
-    dec_m: str,
-    dec_s: str,
-) -> None:
-    global outfile
-
-    outfile.write(
-        "    MOUNT GOTO \""
-        + ra_h
-        + " "
-        + ra_m
-        + " "
-        + ra_s
-        + ", "
-        + dec_d
-        + " "
-        + dec_m
-        + " "
-        + dec_s
-        + "\"\n"
-    )
-
-def plate_solve() -> None:
-    global outfile
-
-    outfile.write("    PRESERVE CAMERA SETTINGS\n")
-    outfile.write("        SET EXPOSURE TO 2\n")
-    outfile.write("        SET GAIN TO 100\n")
-    outfile.write("        MOUNT SOLVEANDSYNC\n")
-    outfile.write("    END PRESERVE\n")
-    outfile.write("    DELAY 10\n")
-
 def create_target() -> None:
     global outfile
     global dither
@@ -212,21 +176,17 @@ def create_target() -> None:
     # Configure target coordinates
     ra_h, ra_m, ra_s, dec_d, dec_m, dec_s = get_coordinates()
 
-    write_mount_goto(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
-    outfile.write("    DELAY 20\n")
-
     # Set target name
     target_name = input("Enter target name\n")
     
     write_target_name(target_name)
 
+    # Slew and plate solve to a position 3 degrees off target
+    ssp_common.goto_plate_solve(outfile, 3, 2, True, ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
+
     # Platesolve and correct position twice
-    outfile.write("    WHEEL MOVE TO 1\n")
-    outfile.write("    DELAY 20\n")
-    plate_solve()
-    write_mount_goto(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
-    outfile.write("    DELAY 20\n")
-    plate_solve()
+    ssp_common.goto_plate_solve(outfile, 0, 2, True, ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
+    ssp_common.goto_plate_solve(outfile, 0, 2, True, ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
 
     # Set filter
     outfile.write("    WHEEL MOVE TO " + str(filter_type.value) + "\n")

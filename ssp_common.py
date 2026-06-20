@@ -135,3 +135,37 @@ def run_autofocus(outfile, rough_focus, frame_subtraction, exposure_time) -> flo
     frame_subtraction = 1440 / exposure_time
 
     return frame_subtraction
+    
+def goto_plate_solve(outfile, offset, exposure, wheel, ra_h, ra_m, ra_s, dec_d, dec_m, dec_s) -> None:
+    dec_d_offset = int(dec_d)
+
+    if dec_d_offset > 85:
+        dec_d_offset = dec_d_offset - offset
+    else:
+        dec_d_offset = dec_d_offset + offset
+
+    if wheel == True:
+        outfile.write("    WHEEL MOVE TO 1\n")
+        outfile.write("    DELAY 10\n")
+    outfile.write(
+        "    MOUNT GOTO \""
+        + ra_h
+        + " "
+        + ra_m
+        + " "
+        + ra_s
+        + ", "
+        + str(dec_d_offset)
+        + " "
+        + dec_m
+        + " "
+        + dec_s
+        + "\"\n"
+    )
+    outfile.write("    DELAY 10\n")
+    outfile.write("    PRESERVE CAMERA SETTINGS\n")
+    outfile.write("        SET EXPOSURE TO " + str(exposure) + "\n")
+    outfile.write("        SET GAIN TO 100\n")
+    outfile.write("        MOUNT SOLVEANDSYNC\n")
+    outfile.write("    END PRESERVE\n")
+    outfile.write("    DELAY 10\n")

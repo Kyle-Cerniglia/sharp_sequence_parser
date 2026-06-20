@@ -162,29 +162,7 @@ def create_target() -> None:
     write_target_name(target_name)
 
     # Platesolve and correct position
-    outfile.write(
-        "    MOUNT GOTO \""
-        + ra_h
-        + " "
-        + ra_m
-        + " "
-        + ra_s
-        + ", "
-        + dec_d
-        + " "
-        + dec_m
-        + " "
-        + dec_s
-        + "\"\n"
-    )
-
-    outfile.write("    DELAY 10\n")
-    outfile.write("    PRESERVE CAMERA SETTINGS\n")
-    outfile.write("        SET EXPOSURE TO " + str(plate_exposure_time) + "\n")
-    outfile.write("        SET GAIN TO 100\n")
-    outfile.write("        MOUNT SOLVEANDSYNC\n")
-    outfile.write("    END PRESERVE\n")
-    outfile.write("    DELAY 10\n")
+    ssp_common.goto_plate_solve(outfile, 0, plate_exposure_time, False, ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
 
     # Set guiding
     ssp_common.start_guiding(outfile)
