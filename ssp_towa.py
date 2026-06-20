@@ -149,15 +149,6 @@ def write_target_name(target_name: str) -> None:
     else:
         outfile.write("    TARGETNAME \"" + target_name + "\"\n")
 
-def get_coordinates() -> tuple[str, str, str, str, str, str]:
-    ra_h = input("Enter J2000 coordinates (RA h)\n")
-    ra_m = input("Enter J2000 coordinates (RA m)\n")
-    ra_s = input("Enter J2000 coordinates (RA s)\n")
-    dec_d = input("Enter J2000 coordinates (DEC d)\n")
-    dec_m = input("Enter J2000 coordinates (DEC m)\n")
-    dec_s = input("Enter J2000 coordinates (DEC s)\n")
-    return ra_h, ra_m, ra_s, dec_d, dec_m, dec_s
-
 def create_target() -> None:
     global outfile
     global dither
@@ -174,7 +165,7 @@ def create_target() -> None:
     outfile.write("    MOUNT CONNECT\n")
 
     # Configure target coordinates
-    ra_h, ra_m, ra_s, dec_d, dec_m, dec_s = get_coordinates()
+    ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used = ssp_common.coords_direct()
 
     # Set target name
     target_name = input("Enter target name\n")
