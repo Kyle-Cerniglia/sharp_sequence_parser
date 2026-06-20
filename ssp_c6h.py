@@ -114,7 +114,7 @@ def preset() -> None:
         preset_val = Presets.C6H_NB
     outfile.write(f"    LOAD PROFILE \"{preset_val.value}\"\n")
 
-def write_target_name(target_name: str) -> None:
+def identify_target_name(target_name: str) -> None:
     global outfile
 
     if filter_type == Filters.UVIR:
@@ -158,7 +158,7 @@ def create_target() -> None:
     else:
         target_name = input("Enter target name\n")
         
-    write_target_name(target_name)
+    identify_target_name(target_name)
 
     # Platesolve and correct position
     ssp_common.goto_plate_solve(outfile, 0, plate_exposure_time, False, ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)

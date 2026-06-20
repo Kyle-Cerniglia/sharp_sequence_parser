@@ -150,7 +150,7 @@ def preset() -> None:
         preset_val = Presets.CARBON_NB
     outfile.write(f"    LOAD PROFILE {preset_val.value}\n")
 
-def write_target_name(target_name: str) -> None:
+def identify_target_name(target_name: str) -> None:
     global outfile
 
     if filter_type == Filters.LUMINANCE:
@@ -203,7 +203,7 @@ def create_target() -> None:
     else:
         target_name = input("Enter target name\n")
         
-    write_target_name(target_name)
+    identify_target_name(target_name)
 
     # Slew and plate solve to a position 3 degrees off target
     ssp_common.goto_plate_solve(outfile, 3, 2, True, ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
