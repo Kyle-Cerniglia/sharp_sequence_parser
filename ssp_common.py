@@ -171,6 +171,8 @@ def goto_plate_solve(outfile, offset, exposure, wheel, ra_h, ra_m, ra_s, dec_d, 
     outfile.write("    DELAY 10\n")
     
 def set_format(outfile, mono) -> None:
+    outfile.write("    DELAY 1\n")
+    outfile.write("    STILL MODE\n")
     if mono == True:
         outfile.write("    SET COLOUR SPACE TO MONO16\n")
     else:

@@ -154,10 +154,6 @@ def create_target() -> None:
     global dither
     global temperature
 
-    # Setup
-    outfile.write("    DELAY 1\n")
-    outfile.write("    STILL MODE\n")
-
     # Configure image formatting
     ssp_common.set_format(outfile, True)
     

@@ -179,10 +179,6 @@ def create_target() -> None:
     global rough_focus
     global exposure_time
 
-    # Setup
-    outfile.write("    DELAY 1\n")
-    outfile.write("    STILL MODE\n")
-
     # Configure image formatting
     ssp_common.set_format(outfile, True)
     
