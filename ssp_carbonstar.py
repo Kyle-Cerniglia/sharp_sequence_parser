@@ -1,5 +1,8 @@
-# Parser for the sharpcap sequencer
-# Designed for a Minicam8M mounted to a Carbonstar 150
+"""
+FILE: ssp_carbonstar.py
+DESCRIPTION: This file hosts the main function and unique functions for generating sequences for the Carbonstar.
+             Designed for a Minicam8M mounted to a Carbonstar 150 with a Pegasus 3 autofocuser.
+"""
 
 import sys
 import math
@@ -7,7 +10,8 @@ from enum import Enum
 from enum import auto
 from typing import Optional
 import ssp_common
-    
+
+# Filters
 class Filters(Enum):
     LUMINANCE = 1
     RED = 2
@@ -19,10 +23,12 @@ class Filters(Enum):
     NONE = 8
     RGB = 9
 
+# Sharpcap preset names
 class Presets(Enum):
     CARBON_LRGB = "MC8_LRGB"
     CARBON_NB = "MC8_NB"
-    
+
+# Exposure durations for each filter (s)
 class Exposure(Enum):
     LUMINANCE = 30
     RED = 30
@@ -34,6 +40,7 @@ class Exposure(Enum):
     NONE = 2
     RGB = 30
 
+# Platesolving durations for each filter (s)
 class Plate(Enum):
     LUMINANCE = 2
     RED = 2
@@ -45,6 +52,7 @@ class Plate(Enum):
     NONE = 2
     RGB = 2
 
+# Time divider for each filter (Adust this value to get actual sequence duration to match the intended sequence duration)
 class Timediv(Enum):
     LUMINANCE = 33.44
     RED = 33.44
@@ -56,6 +64,7 @@ class Timediv(Enum):
     NONE = 33.44
     RGB = 33.44
 
+# Dither frequency for each filter (Frames per dither event)
 class Dither(Enum):
     LUMINANCE = 20
     RED = 20
@@ -66,7 +75,8 @@ class Dither(Enum):
     OIII = 3
     NONE = 20
     RGB = 20
-    
+
+# Cooler parameters
 class Cool(Enum):
     RATE = 25
     TOLERANCE = 1
@@ -84,6 +94,20 @@ rgb_flag = False
 catalog_search = ""
 catalog_used = False
 
+"""
+FUNCTION: init_session
+DESCRIPTION: Data initializer
+INPUTS:
+out_file: Output file
+temp: Cooler temperature (C)
+filter_val: Filter selection
+exposure_val: Exposure duration (s)
+timediv_val: Time divider
+dither_val: Dither frequency (Frames per dither)
+plate_exposure_time: Platesolving exposure duration (s)
+rough_focus_val: Rough autofocus position
+OUTPUTS: None
+"""
 def init_session(
     out_file,
     temp=None,
@@ -117,6 +141,12 @@ def init_session(
     plate_exposure_time = plate_exposure_val
     rough_focus = rough_focus_val
 
+"""
+FUNCTION: set_filter
+DESCRIPTION: User selects the filter for the session.
+INPUTS: None
+OUTPUTS: None
+"""
 def set_filter() -> None:
     global filter_type
     global rgb_flag
@@ -141,6 +171,12 @@ def set_filter() -> None:
     else:
         rgb_flag = False
 
+"""
+FUNCTION: preset
+DESCRIPTION: Selects the sharpcap preset depending on what kind of filter was selected (BB vs NB).
+INPUTS: None
+OUTPUTS: None
+"""
 def preset() -> None:
     global outfile
     global filter_type
@@ -151,6 +187,13 @@ def preset() -> None:
         preset_val = Presets.CARBON_NB
     outfile.write(f"    LOAD PROFILE {preset_val.value}\n")
 
+"""
+FUNCTION: identify_target_name
+DESCRIPTION: Identifies the target name based on the target and the active filter.
+INPUTS:
+target_name: Target name
+OUTPUTS: None
+"""
 def identify_target_name(target_name: str) -> None:
     global outfile
     global filter_type
@@ -172,6 +215,12 @@ def identify_target_name(target_name: str) -> None:
     else:
         ssp_common.write_target_name(outfile, target_name, "")
 
+"""
+FUNCTION: create_target
+DESCRIPTION: Create an imaging target sequence (Unique to this telescope setup, incorporating common and local functions).
+INPUTS: None
+OUTPUTS: None
+"""
 def create_target() -> None:
     global outfile
     global catalog_used
@@ -218,7 +267,7 @@ def create_target() -> None:
     # Autofocus
     frame_subtraction = 0
     if rough_focus != -1:
-        frame_subtraction = ssp_common.run_autofocus(outfile, rough_focus, frame_subtraction, exposure_time)
+        frame_subtraction = ssp_common.run_autofocus(outfile, rough_focus, exposure_time)
 
     # Set filter
     ssp_common.set_filter(outfile, filter_type.value)
@@ -239,6 +288,14 @@ def create_target() -> None:
     #Finish target
     ssp_common.stop_guiding(outfile)
 
+"""
+FUNCTION: create_rgb_target
+DESCRIPTION: Create an imaging target sequence (Unique to this telescope setup, incorporating common and local functions).
+             This function is selected if the user selects the 'RGB' filter option. It will split the imaging time equally
+             between the Red, Green, and Blue filter in a single imaging session.
+INPUTS: None
+OUTPUTS: None
+"""
 def create_rgb_target() -> None:
     global outfile
     global catalog_used
@@ -290,7 +347,7 @@ def create_rgb_target() -> None:
     # Autofocus
     frame_subtraction = 0
     if rough_focus != -1:
-        frame_subtraction = ssp_common.run_autofocus(outfile, rough_focus, frame_subtraction, exposure_time)
+        frame_subtraction = ssp_common.run_autofocus(outfile, rough_focus, exposure_time)
 
     # Set RED filter
     ssp_common.set_filter(outfile, Filters.RED.value)
@@ -323,6 +380,12 @@ def create_rgb_target() -> None:
     # Finish target
     ssp_common.stop_guiding(outfile)
 
+"""
+FUNCTION: main
+DESCRIPTION: Main function that contols the sequence generation and logical flow.
+INPUTS: None
+OUTPUTS: None
+"""
 def main() -> None:
     global rgb_flag
     global outfile
@@ -332,6 +395,7 @@ def main() -> None:
     global timediv
     global dither
     
+    # CMD line arguments
     if len(sys.argv) != 1:
         print('Formatting error!')
         print('Example: ssp_towa.py')
@@ -343,24 +407,31 @@ def main() -> None:
     filename += ".scs"
     fileout = open(filename, "w+")
 
+    # Initialize session data
     init_session(fileout, 100, Filters.LUMINANCE, 0, 0, 0, 0, -1)
 
+    # Set sequence start time
     ssp_common.start_time(outfile)
     
-    temperature = ssp_common.set_temp(temperature)
+    # Set cooler temperature
+    temperature = ssp_common.set_temp()
     
+    # Set filter type
     set_filter()
     
+    # Fetch capture parameters
     exposure_time, plate_exposure_time, timediv, dither = ssp_common.calc_capture_vals(filter_type, Exposure, Plate, Timediv, Dither)
     
+    # Unpark mount
     ssp_common.unpark(outfile)
 
+    # Create normal target or RGB target
     if (rgb_flag == True):
         create_rgb_target()
     else:
         create_target()
 
-    #Insert additional targets
+    #Insert additional targets or RGB targets
     while input("Enter additional target? (y/n)") == 'y':
         set_filter()
         exposure_time, plate_exposure_time, timediv, dither = ssp_common.calc_capture_vals(filter_type, Exposure, Plate, Timediv, Dither)
@@ -369,6 +440,7 @@ def main() -> None:
         else:
             create_target()
 
+    # Park mount and end sequence
     ssp_common.shutdown(outfile, True, temperature)
 
     print("Sequence file generated!\n")

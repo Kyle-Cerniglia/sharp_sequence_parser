@@ -1,5 +1,8 @@
-# Parser for the sharpcap sequencer
-# Designed for an ASI533MC Pro mounted to a C6 with a Hyperstar
+"""
+FILE: ssp_c6h.py
+DESCRIPTION: This file hosts the main function and unique functions for generating sequences for the C6-Hyperstar.
+             Designed for an ASI533MC Pro mounted to a C6 with a Hyperstar
+"""
 
 import sys
 import math
@@ -7,7 +10,8 @@ from enum import Enum
 from enum import auto
 from typing import Optional
 import ssp_common
-    
+
+# Filters
 class Filters(Enum):
     UVIR = 1
     LENHANCE = 2
@@ -15,10 +19,12 @@ class Filters(Enum):
     D1 = 4
     D2 = 5
 
+# Sharpcap preset names
 class Presets(Enum):
     C6H_OSC = "C6H OSC"
     C6H_NB = "C6H NB"
 
+# Exposure durations for each filter (s)
 class Exposure(Enum):
     UVIR = 15
     LPRO = 30
@@ -26,6 +32,7 @@ class Exposure(Enum):
     D1 = 240
     D2 = 240
 
+# Platesolving durations for each filter (s)
 class Plate(Enum):
     UVIR = 1
     LPRO = 1
@@ -33,6 +40,7 @@ class Plate(Enum):
     D1 = 8
     D2 = 8
 
+# Time divider for each filter (Adust this value to get actual sequence duration to match the intended sequence duration)
 class Timediv(Enum):
     UVIR = 18.62
     LPRO = 35.08
@@ -40,13 +48,15 @@ class Timediv(Enum):
     D1 = 247
     D2 = 247
 
+# Dither frequency for each filter (Frames per dither event)
 class Dither(Enum):
     UVIR = 24
     LPRO = 12
     LENHANCE = 8
     D1 = 3
     D2 = 3
-    
+
+# Cooler parameters
 class Cool(Enum):
     RATE = 8
     TOLERANCE = 1
@@ -62,6 +72,19 @@ plate_exposure_time = None
 catalog_search = ""
 catalog_used = False
 
+"""
+FUNCTION: init_session
+DESCRIPTION: Data initializer
+INPUTS:
+out_file: Output file
+temp: Cooler temperature (C)
+filter_val: Filter selection
+exposure_val: Exposure duration (s)
+timediv_val: Time divider
+dither_val: Dither frequency (Frames per dither)
+plate_exposure_time: Platesolving exposure duration (s)
+OUTPUTS: None
+"""
 def init_session(
     out_file,
     temp=None,
@@ -92,6 +115,12 @@ def init_session(
     dither = dither_val
     plate_exposure_time = plate_exposure_val
 
+"""
+FUNCTION: set_filter
+DESCRIPTION: User selects the filter for the session.
+INPUTS: None
+OUTPUTS: None
+"""
 def set_filter() -> None:
     global filter_type
 
@@ -105,6 +134,12 @@ def set_filter() -> None:
     )
     filter_type = Filters(int(filter_in))
 
+"""
+FUNCTION: preset
+DESCRIPTION: Selects the sharpcap preset depending on what kind of filter was selected (BB vs NB).
+INPUTS: None
+OUTPUTS: None
+"""
 def preset() -> None:
     global outfile
     global filter_type
@@ -115,6 +150,13 @@ def preset() -> None:
         preset_val = Presets.C6H_NB
     outfile.write(f"    LOAD PROFILE \"{preset_val.value}\"\n")
 
+"""
+FUNCTION: identify_target_name
+DESCRIPTION: Identifies the target name based on the target and the active filter.
+INPUTS:
+target_name: Target name
+OUTPUTS: None
+"""
 def identify_target_name(target_name: str) -> None:
     global outfile
     global filter_type
@@ -132,6 +174,12 @@ def identify_target_name(target_name: str) -> None:
     else:
         ssp_common.write_target_name(outfile, target_name, "")
 
+"""
+FUNCTION: create_target
+DESCRIPTION: Create an imaging target sequence (Unique to this telescope setup, incorporating common and local functions).
+INPUTS: None
+OUTPUTS: None
+"""
 def create_target() -> None:
     global outfile
     global catalog_used
@@ -181,6 +229,12 @@ def create_target() -> None:
     # Finish target
     ssp_common.stop_guiding(outfile)
 
+"""
+FUNCTION: main
+DESCRIPTION: Main function that contols the sequence generation and logical flow.
+INPUTS: None
+OUTPUTS: None
+"""
 def main() -> None:
     global outfile
     global temperature
@@ -189,6 +243,7 @@ def main() -> None:
     global timediv
     global dither
     
+    # CMD line arguments
     if len(sys.argv) != 1:
         print('Formatting error!')
         print('Example: sharp_sequence_parser.py')
@@ -200,18 +255,25 @@ def main() -> None:
     filename += ".scs"
     fileout = open(filename, "w+")
 
+    # Initialize session data
     init_session(fileout, 100, Filters.UVIR, 0, 0, 0, 0)
 
+    # Set sequence start time
     ssp_common.start_time(outfile)
     
-    temperature = ssp_common.set_temp(temperature)
+    # Set cooler temperature
+    temperature = ssp_common.set_temp()
     
+    # Set filter type
     set_filter()
     
+    # Fetch capture parameters
     exposure_time, plate_exposure_time, timediv, dither = ssp_common.calc_capture_vals(filter_type, Exposure, Plate, Timediv, Dither)
     
+    # Unpark mount
     ssp_common.unpark(outfile)
 
+    # Create target
     create_target()
 
     #Insert additional targets
@@ -220,6 +282,7 @@ def main() -> None:
 
     ssp_common.shutdown(outfile, False, temperature)
 
+    # Park mount and end sequence
     print("Sequence file generated!\n")
 
 if __name__ == "__main__":
