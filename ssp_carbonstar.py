@@ -150,13 +150,6 @@ def preset() -> None:
         preset_val = Presets.CARBON_NB
     outfile.write(f"    LOAD PROFILE {preset_val.value}\n")
 
-def autofocus() -> None:
-    global rough_focus
-
-    rough_focus = int(
-        input("Set autofocuser rough focal point (Set to -1 to disable):\n")
-    )
-
 def write_target_name(target_name: str) -> None:
     global outfile
 
@@ -266,6 +259,7 @@ def create_target() -> None:
     global catalog_search
     global dither
     global temperature
+    global rough_focus
 
     # Setup
     outfile.write("    DELAY 1\n")
@@ -278,7 +272,7 @@ def create_target() -> None:
     outfile.write("    MOUNT CONNECT\n")
 
     # Configure autofocus
-    autofocus()
+    rough_focus = ssp_common.autofocus()
 
     # Configure target
     if input("Lookup catalog target? (y/n)\n") == "y":
@@ -333,6 +327,7 @@ def create_rgb_target() -> None:
     global catalog_search
     global dither
     global temperature
+    global rough_focus
 
     # Setup
     outfile.write("    DELAY 1\n")
@@ -345,7 +340,7 @@ def create_rgb_target() -> None:
     outfile.write("    MOUNT CONNECT\n")
 
     # Configure autofocus
-    autofocus()
+    rough_focus = ssp_common.autofocus()
 
     # Configure target
     if input("Lookup catalog target? (y/n)\n") == "y":

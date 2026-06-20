@@ -116,3 +116,7 @@ def shutdown(outfile, wheel, temperature) -> None:
         outfile.write("    WHEEL MOVE TO 1\n")
     outfile.write("END SEQUENCE\n")
     outfile.close()
+    
+def autofocus() -> None:
+    rough_focus = int(input("Set autofocuser rough focal point (Set to -1 to disable):\n"))
+    return rough_focus
