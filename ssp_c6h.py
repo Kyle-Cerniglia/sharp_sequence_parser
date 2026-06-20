@@ -144,9 +144,11 @@ def create_target() -> None:
     # Configure image formatting
     ssp_common.set_format(outfile, False)
     
+    # Configure sharpcap preset
     preset()
     
-    outfile.write("    MOUNT CONNECT\n")
+    # Connect to mount
+    ssp_common.connect_mount(outfile)
 
     # Configure target
     if input("Lookup catalog target? (y/n)\n") == "y":

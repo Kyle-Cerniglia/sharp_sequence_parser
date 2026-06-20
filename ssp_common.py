@@ -176,3 +176,6 @@ def set_format(outfile, mono) -> None:
     else:
         outfile.write("    SET COLOUR SPACE TO RAW16\n")
     outfile.write("    SET OUTPUT FORMAT TO \"FITS files (*.fits)\"\n")
+    
+def connect_mount(outfile) -> None:
+    outfile.write("    MOUNT CONNECT\n")

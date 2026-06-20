@@ -164,7 +164,8 @@ def create_target() -> None:
     # Configure sharpcap preset
     preset()
     
-    outfile.write("    MOUNT CONNECT\n")
+    # Connect to mount
+    ssp_common.connect_mount(outfile)
 
     # Configure target coordinates
     ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used = ssp_common.coords_direct()

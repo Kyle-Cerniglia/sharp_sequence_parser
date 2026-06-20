@@ -186,9 +186,11 @@ def create_target() -> None:
     # Configure image formatting
     ssp_common.set_format(outfile, True)
     
+    # Configure sharpcap preset
     preset()
     
-    outfile.write("    MOUNT CONNECT\n")
+    # Connect to mount
+    ssp_common.connect_mount(outfile)
 
     # Configure autofocus
     rough_focus = ssp_common.set_autofocus()
@@ -258,9 +260,11 @@ def create_rgb_target() -> None:
     # Configure image formatting
     ssp_common.set_format(outfile, True)
     
+    # Connect to mount
     preset()
     
-    outfile.write("    MOUNT CONNECT\n")
+    # Connect to mount
+    ssp_common.connect_mount(outfile)
 
     # Configure autofocus
     rough_focus = ssp_common.set_autofocus()
