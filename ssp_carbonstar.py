@@ -1,17 +1,17 @@
-# Parser for the sharpcap sequencer
-# Designed for an Minicam8M mounted to a Carbonstar 150
+"""
+FILE: ssp_carbonstar.py
+DESCRIPTION: This file hosts the main function and unique functions for generating sequences for the Carbonstar.
+             Designed for a Minicam8M mounted to a Carbonstar 150 with a Pegasus 3 autofocuser.
+"""
 
 import sys
 import math
 from enum import Enum
 from enum import auto
-import csv
-from pathlib import Path
 from typing import Optional
+import ssp_common
 
-class Telescope(Enum):
-    CARBON = 2
-    
+# Filters
 class Filters(Enum):
     LUMINANCE = 1
     RED = 2
@@ -23,487 +23,379 @@ class Filters(Enum):
     NONE = 8
     RGB = 9
 
+# Sharpcap preset names
 class Presets(Enum):
     CARBON_LRGB = "MC8_LRGB"
     CARBON_NB = "MC8_NB"
 
-# Exposure time
-EXPOSURE_CARBON = {
-    Filters.LUMINANCE: 30,
-    Filters.RED: 30,
-    Filters.GREEN: 30,
-    Filters.BLUE: 30,
-    Filters.SII: 180,
-    Filters.HA: 180,
-    Filters.OIII: 180,
-    Filters.NONE: 2,
-    Filters.RGB: 30
-}
-EXPOSURE = {
-    Telescope.CARBON: EXPOSURE_CARBON
-}
+# Exposure durations for each filter (s)
+class Exposure(Enum):
+    LUMINANCE = 30
+    RED = 30
+    GREEN = 30
+    BLUE = 30
+    SII = 180
+    HA = 180
+    OIII = 180
+    NONE = 2
+    RGB = 30
 
-# Platesolving exposure time
-PLATE_EXPOSURE_CARBON = {
-    Filters.LUMINANCE: 2,
-    Filters.RED: 2,
-    Filters.GREEN: 2,
-    Filters.BLUE: 2,
-    Filters.SII: 2,
-    Filters.HA: 2,
-    Filters.OIII: 2,
-    Filters.NONE: 2,
-    Filters.RGB: 2
-}
-PLATE_EXPOSURE = {
-    Telescope.CARBON: PLATE_EXPOSURE_CARBON
-}
+# Platesolving durations for each filter (s)
+class Plate(Enum):
+    LUMINANCE = 2
+    RED = 2
+    GREEN = 2
+    BLUE = 2
+    SII = 2
+    HA = 2
+    OIII = 2
+    NONE = 2
+    RGB = 2
 
-# Time divider for frame calculation
-TIMEDIV_CARBON = {
-    Filters.LUMINANCE: 33.44,
-    Filters.RED: 33.44,
-    Filters.GREEN: 33.44,
-    Filters.BLUE: 33.44,
-    Filters.SII: 195.26,
-    Filters.HA: 195.26,
-    Filters.OIII: 195.26,
-    Filters.NONE: 33.44,
-    Filters.RGB: 33.44
-}
-TIMEDIV = {
-    Telescope.CARBON: TIMEDIV_CARBON
-}
+# Time divider for each filter (Adust this value to get actual sequence duration to match the intended sequence duration)
+class Timediv(Enum):
+    LUMINANCE = 33.44
+    RED = 33.44
+    GREEN = 33.44
+    BLUE = 33.44
+    SII = 195.26
+    HA = 195.26
+    OIII = 195.26
+    NONE = 33.44
+    RGB = 33.44
 
-# Frames per dither
-DITHER_CARBON = {
-    Filters.LUMINANCE: 20,
-    Filters.RED: 20,
-    Filters.GREEN: 20,
-    Filters.BLUE: 20,
-    Filters.SII: 3,
-    Filters.HA: 3,
-    Filters.OIII: 3,
-    Filters.NONE: 20,
-    Filters.RGB: 20
-}
-DITHER = {
-    Telescope.CARBON: DITHER_CARBON
-}
+# Dither frequency for each filter (Frames per dither event)
+class Dither(Enum):
+    LUMINANCE = 20
+    RED = 20
+    GREEN = 20
+    BLUE = 20
+    SII = 3
+    HA = 3
+    OIII = 3
+    NONE = 20
+    RGB = 20
 
+# Cooler parameters
+class Cool(Enum):
+    RATE = 25
+    TOLERANCE = 1
+
+# Local function variables
+outfile = None
+temperature = None
+filter_type = None
+exposure_time = None
+timediv = None
+dither = None
+plate_exposure_time = None
+rough_focus = None
 rgb_flag = False
-ra_h = ""
-ra_m = ""
-ra_s = ""
-dec_d = ""
-dec_m = ""
-dec_s = ""
-master_catalog = Path("catalogs") / "master.csv"
-list_catalog = Path("catalogs") / "available_catalogs.txt"
 catalog_search = ""
 catalog_used = False
 
-def coords_direct() -> None:
-    global ra_h
-    global ra_m
-    global ra_s
-    global dec_d
-    global dec_m
-    global dec_s
+"""
+FUNCTION: init_session
+DESCRIPTION: Data initializer
+INPUTS:
+out_file: Output file
+temp: Cooler temperature (C)
+filter_val: Filter selection
+exposure_val: Exposure duration (s)
+timediv_val: Time divider
+dither_val: Dither frequency (Frames per dither)
+plate_exposure_time: Platesolving exposure duration (s)
+rough_focus_val: Rough autofocus position
+OUTPUTS: None
+"""
+def init_session(
+    out_file,
+    temp=None,
+    filter_val=None,
+    exposure_val=None,
+    timediv_val=None,
+    dither_val=None,
+    plate_exposure_val=None,
+    rough_focus_val=None,
+) -> None:
+    """
+    Replaces Session.__init__().
+    Stores the session data in globals instead of self fields.
+    """
+
+    global outfile
+    global temperature
+    global filter_type
+    global exposure_time
+    global timediv
+    global dither
+    global plate_exposure_time
+    global rough_focus
+
+    outfile = out_file
+    temperature = temp
+    filter_type = filter_val
+    exposure_time = exposure_val
+    timediv = timediv_val
+    dither = dither_val
+    plate_exposure_time = plate_exposure_val
+    rough_focus = rough_focus_val
+
+"""
+FUNCTION: set_filter
+DESCRIPTION: User selects the filter for the session.
+INPUTS: None
+OUTPUTS: None
+"""
+def set_filter() -> None:
+    global filter_type
+    global rgb_flag
+
+    filter_in = input(
+        "Select your filter:\n"
+        "[1] = Luminance\n"
+        "[2] = Red\n"
+        "[3] = Green\n"
+        "[4] = Blue\n"
+        "[5] = SII\n"
+        "[6] = Ha\n"
+        "[7] = OIII\n"
+        "[8] = None\n"
+        "[9] = RGB\n"
+    )
+
+    filter_type = Filters(int(filter_in))
+
+    if filter_type == Filters.RGB:
+        rgb_flag = True
+    else:
+        rgb_flag = False
+
+"""
+FUNCTION: preset
+DESCRIPTION: Selects the sharpcap preset depending on what kind of filter was selected (BB vs NB).
+INPUTS: None
+OUTPUTS: None
+"""
+def preset() -> None:
+    global outfile
+    global filter_type
+
+    if filter_type in [Filters.LUMINANCE, Filters.RED, Filters.GREEN, Filters.BLUE]:
+        preset_val = Presets.CARBON_LRGB
+    else:
+        preset_val = Presets.CARBON_NB
+    outfile.write(f"    LOAD PROFILE {preset_val.value}\n")
+
+"""
+FUNCTION: identify_target_name
+DESCRIPTION: Identifies the target name based on the target and the active filter.
+INPUTS:
+target_name: Target name
+OUTPUTS: None
+"""
+def identify_target_name(target_name: str) -> None:
+    global outfile
+    global filter_type
+
+    if filter_type == Filters.LUMINANCE:
+        ssp_common.write_target_name(outfile, target_name, "l")
+    elif filter_type == Filters.RED:
+        ssp_common.write_target_name(outfile, target_name, "r")
+    elif filter_type == Filters.GREEN:
+        ssp_common.write_target_name(outfile, target_name, "g")
+    elif filter_type == Filters.BLUE:
+        ssp_common.write_target_name(outfile, target_name, "b")
+    elif filter_type == Filters.SII:
+        ssp_common.write_target_name(outfile, target_name, "s")
+    elif filter_type == Filters.HA:
+        ssp_common.write_target_name(outfile, target_name, "h")
+    elif filter_type == Filters.OIII:
+        ssp_common.write_target_name(outfile, target_name, "o")
+    else:
+        ssp_common.write_target_name(outfile, target_name, "")
+
+"""
+FUNCTION: create_target
+DESCRIPTION: Create an imaging target sequence (Unique to this telescope setup, incorporating common and local functions).
+INPUTS: None
+OUTPUTS: None
+"""
+def create_target() -> None:
+    global outfile
     global catalog_used
-    
-    ra_h = input("Enter J2000 coordinates (RA h)\n")
-    ra_m = input("Enter J2000 coordinates (RA m)\n")
-    ra_s = input("Enter J2000 coordinates (RA s)\n")
-    dec_d = input("Enter J2000 coordinates (DEC d)\n")
-    dec_m = input("Enter J2000 coordinates (DEC m)\n")
-    dec_s = input("Enter J2000 coordinates (DEC s)\n")
-    
-    catalog_used = False
-    
-def coords_catalog() -> None:
-    global ra_h
-    global ra_m
-    global ra_s
-    global dec_d
-    global dec_m
-    global dec_s
     global catalog_search
+    global dither
+    global temperature
+    global rough_focus
+    global exposure_time
+    global timediv
+
+    # Configure image formatting
+    ssp_common.set_format(outfile, True)
+    
+    # Configure sharpcap preset
+    preset()
+    
+    # Connect to mount
+    ssp_common.connect_mount(outfile)
+
+    # Configure autofocus
+    rough_focus = ssp_common.set_autofocus()
+
+    # Configure target
+    if input("Lookup catalog target? (y/n)\n") == "y":
+        ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used, catalog_search = ssp_common.coords_catalog()
+    else:
+        ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used = ssp_common.coords_direct()
+
+    # Set target name
+    if catalog_used:
+        target_name = catalog_search
+    else:
+        target_name = input("Enter target name\n")
+        
+    identify_target_name(target_name)
+
+    # Slew and plate solve to a position 3 degrees off target
+    ssp_common.goto_plate_solve(outfile, 3, 2, True, ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
+
+    # Platesolve and correct position twice
+    ssp_common.goto_plate_solve(outfile, 0, 2, True, ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
+    ssp_common.goto_plate_solve(outfile, 0, 2, True, ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
+
+    # Autofocus
+    frame_subtraction = 0
+    if rough_focus != -1:
+        frame_subtraction = ssp_common.run_autofocus(outfile, rough_focus, exposure_time)
+
+    # Set filter
+    ssp_common.set_filter(outfile, filter_type.value)
+
+    # Set guiding
+    ssp_common.start_guiding(outfile)
+
+    # Set cooler temperature
+    ssp_common.cool_camera(outfile, Cool, temperature)
+
+    # Set exposure
+    ssp_common.set_exposure(outfile, exposure_time)
+
+    # Set frame capture
+    frame_qty = ssp_common.frame_calc(outfile, timediv, frame_subtraction, 1)
+    ssp_common.write_light_capture(outfile, frame_qty, dither)
+    
+    #Finish target
+    ssp_common.stop_guiding(outfile)
+
+"""
+FUNCTION: create_rgb_target
+DESCRIPTION: Create an imaging target sequence (Unique to this telescope setup, incorporating common and local functions).
+             This function is selected if the user selects the 'RGB' filter option. It will split the imaging time equally
+             between the Red, Green, and Blue filter in a single imaging session.
+INPUTS: None
+OUTPUTS: None
+"""
+def create_rgb_target() -> None:
+    global outfile
     global catalog_used
+    global catalog_search
+    global dither
+    global temperature
+    global rough_focus
+    global exposure_time
+    global timediv
+
+    # Setup
+    outfile.write("    DELAY 1\n")
+    outfile.write("    STILL MODE\n")
+
+    # Configure image formatting
+    ssp_common.set_format(outfile, True)
     
-    #Show users the available catalogs
-    print("Available catalogs:\n")
-    with list_catalog.open("r", encoding="utf-8") as f:
-        contents = f.read()
-    print(contents)
+    # Connect to mount
+    preset()
     
-    catalog_search = input("\nEnter catalog name (Ex. m101):\n")
-    
-    try:
-        with master_catalog.open(mode="r", encoding="utf-8", newline="") as f:
-            reader = csv.reader(f)
+    # Connect to mount
+    ssp_common.connect_mount(outfile)
 
-            for row in reader:
-                # Skip empty or short rows
-                if len(row) < 7:
-                    continue
+    # Configure autofocus
+    rough_focus = ssp_common.set_autofocus()
 
-                if row[0] == catalog_search:
-                    ra_h = row[1]
-                    ra_m = row[2]
-                    ra_s = row[3]
-                    dec_d = row[4]
-                    dec_m = row[5]
-                    dec_s = row[6]
-                    catalog_used = True
-                    return
-            #If you got here, then the item wasn't found
-            print("Catalog object not found, please enter in coordinates manually\n")
-            coords_direct()
+    # Configure target
+    if input("Lookup catalog target? (y/n)\n") == "y":
+        ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used, catalog_search = ssp_common.coords_catalog()
+    else:
+        ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used = ssp_common.coords_direct()
 
-    except FileNotFoundError:
-        print("Catalog file not found, please enter in coordinates manually\n")
-        coords_direct()
+    # Set target name
+    if catalog_used:
+        target_name = catalog_search
+    else:
+        target_name = input("Enter RGB target name\n")
 
-class Session:
-    def __init__(
-        self, outfile, temperature, filter_type, telescope_type, exposure_time, timediv, dither, plate_exposure_time, rough_focus
-    ):
-        self.outfile = outfile
-        self.temperature = temperature
-        self.filter_type = filter_type
-        self.telescope_type = telescope_type
-        self.exposure_time = exposure_time
-        self.timediv = timediv
-        self.dither = dither
-        self.plate_exposure_time = plate_exposure_time
-        self.rough_focus = rough_focus
-    
-    def start_time(self) -> None:
-        #Set start time
-        self.outfile.write("SEQUENCE\n")
-    
-        if input("Set a start time? (y/n)\n") == 'y':
-            hour = input("Enter hour start (24h)\n")
-            minute = input("Enter minute start\n")
-            if int(minute) < 10:
-                minute = "0" + minute
-            if int(hour) < 12:
-                self.outfile.write("    WAIT UNTIL LOCALTIME \"" + hour + ":" + minute + " AM\"\n")
-            else:
-                hour = str(int(hour) - 12);
-                self.outfile.write("    WAIT UNTIL LOCALTIME \"" + hour + ":" + minute + " PM\"\n")
-                
-    def unpark(self) -> None:
-        self.outfile.write("    DELAY 1\n")
-        self.outfile.write("    MOUNT UNPARK\n")
-        self.outfile.write("    MOUNT UNPARK\n")
-    
-    def set_temp(self) -> None:
-        #Set cooler temperature
-        self.temperature = input("Set cooler temp C (100 to disable)\n")
-        
-    def set_telescope(self) -> None:
-        self.telescope_type = Telescope(2)
-        
-    def set_filter(self) -> None:
-        global rgb_flag
-        filter_in = input("Select your filter:\n[1] = Luminance\n[2] = Red\n[3] = Green\n[4] = Blue\n[5] = SII\n[6] = Ha\n[7] = OIII\n[8] = None\n[9] = RGB\n")
-        self.filter_type = Filters(int(filter_in))
-        if self.filter_type in [Filters.RGB]:
-            rgb_flag = True
-        else:
-            rgb_flag = False
-    
-    def calc_capture_vals(self) -> None:
-        self.exposure_time = EXPOSURE[self.telescope_type][self.filter_type]
-        self.plate_exposure_time = PLATE_EXPOSURE[self.telescope_type][self.filter_type]
-        self.timediv = TIMEDIV[self.telescope_type][self.filter_type]
-        self.dither = DITHER[self.telescope_type][self.filter_type]
-        
-    def preset(self) -> None:
-        if self.filter_type in [Filters.LUMINANCE, Filters.RED, Filters.GREEN, Filters.BLUE]:
-            preset_val = Presets.CARBON_LRGB
-        else:
-            preset_val = Presets.CARBON_NB
-        self.outfile.write(f"    LOAD PROFILE {preset_val.value}\n")
-        
-    def autofocus(self) -> None:
-        #Set rough target focus point
-        self.rough_focus = int(input("Set autofocuser rough focal point (Set to -1 to disable):\n"))
+    # Image RED
+    ssp_common.write_target_name(outfile, target_name, "r")
 
-    def create_target(self) -> None:
-        frame_subtraction = 0
-        
-        #Setup
-        self.outfile.write("    DELAY 1\n")
-        self.outfile.write("    STILL MODE\n")
+    # Slew and plate solve to a position 3 degrees off target
+    ssp_common.goto_plate_solve(outfile, 3, 2, True, ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
 
-        #Configure image formatting
-        self.outfile.write("    SET COLOUR SPACE TO MONO16\n")
-        self.outfile.write("    SET OUTPUT FORMAT TO \"FITS files (*.fits)\"\n")
-        
-        self.preset()
-            
-        self.outfile.write("    MOUNT CONNECT\n")
-        
-        #Configure autofocus
-        self.autofocus()
+    # Platesolve and correct position twice
+    ssp_common.goto_plate_solve(outfile, 0, 2, True, ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
+    ssp_common.goto_plate_solve(outfile, 0, 2, True, ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
 
-        #Configure target
-        if input("Lookup catalog target? (y/n)\n") == 'y':
-            coords_catalog()
-        else:
-            coords_direct()
+    # Autofocus
+    frame_subtraction = 0
+    if rough_focus != -1:
+        frame_subtraction = ssp_common.run_autofocus(outfile, rough_focus, exposure_time)
 
-        #Set target name
-        if(catalog_used):
-            target_name = catalog_search
-        else:
-            target_name = input("Enter target name\n")
-        
-        if self.filter_type in [Filters.LUMINANCE]:
-            self.outfile.write("    TARGETNAME \"" + target_name + "_l\"\n")
-        elif self.filter_type in [Filters.RED]:
-            self.outfile.write("    TARGETNAME \"" + target_name + "_r\"\n")
-        elif self.filter_type in [Filters.GREEN]:
-            self.outfile.write("    TARGETNAME \"" + target_name + "_g\"\n")
-        elif self.filter_type in [Filters.BLUE]:
-            self.outfile.write("    TARGETNAME \"" + target_name + "_b\"\n")
-        elif self.filter_type in [Filters.SII]:
-            self.outfile.write("    TARGETNAME \"" + target_name + "_s\"\n")
-        elif self.filter_type in [Filters.HA]:
-            self.outfile.write("    TARGETNAME \"" + target_name + "_h\"\n")
-        elif self.filter_type in [Filters.OIII]:
-            self.outfile.write("    TARGETNAME \"" + target_name + "_o\"\n")
-        else:
-            self.outfile.write("    TARGETNAME \"" + target_name + "\"\n")
-        
-        #Slew and plate solve to a position 3 degrees off of target (Towards north, unless within 85 degrees) to get a rough platesolve
-        dec_d_offset = int(dec_d)
-        if(dec_d_offset > 85):
-            dec_d_offset = dec_d_offset - 3
-        else:
-            dec_d_offset = dec_d_offset + 3
-        self.outfile.write("    WHEEL MOVE TO 1\n")
-        self.outfile.write("    DELAY 10\n")
-        self.outfile.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + str(dec_d_offset) + " " + dec_m + " " + dec_s + "\"\n")
-        self.outfile.write("    DELAY 10\n")
-        self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
-        self.outfile.write("        SET EXPOSURE TO 2\n")
-        self.outfile.write("        SET GAIN TO 100\n")
-        self.outfile.write("        MOUNT SOLVEANDSYNC\n")
-        self.outfile.write("    END PRESERVE\n")
-        self.outfile.write("    DELAY 10\n")
+    # Set RED filter
+    ssp_common.set_filter(outfile, Filters.RED.value)
 
-        #Platesolve and correct position twice
-        self.outfile.write("    WHEEL MOVE TO 1\n")
-        self.outfile.write("    DELAY 10\n")
-        self.outfile.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + dec_d + " " + dec_m + " " + dec_s + "\"\n")
-        self.outfile.write("    DELAY 10\n")
-        self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
-        self.outfile.write("        SET EXPOSURE TO 2\n")
-        self.outfile.write("        SET GAIN TO 100\n")
-        self.outfile.write("        MOUNT SOLVEANDSYNC\n")
-        self.outfile.write("    END PRESERVE\n")
-        self.outfile.write("    DELAY 10\n")
-        self.outfile.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + dec_d + " " + dec_m + " " + dec_s + "\"\n")
-        self.outfile.write("    DELAY 10\n")
-        self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
-        self.outfile.write("        SET EXPOSURE TO 2\n")
-        self.outfile.write("        SET GAIN TO 100\n")
-        self.outfile.write("        MOUNT SOLVEANDSYNC\n")
-        self.outfile.write("    END PRESERVE\n")
-        self.outfile.write("    DELAY 10\n")
-        
-        #Autofocus
-        if(self.rough_focus != -1):
-            self.outfile.write("    SET EXPOSURE TO 4\n")
-            self.outfile.write("    AUTOFOCUS FROM " + str(self.rough_focus - 100) + " TO " + str(self.rough_focus + 100) + " STEP COUNT 21\n")
-            #Remove 12 minutes from frame time for autofocus
-            frame_subtraction = 1440 / self.exposure_time
-        
-        #Set filter
-        self.outfile.write("    WHEEL MOVE TO " + str(self.filter_type.value) + "\n")
-        self.outfile.write("    DELAY 10\n")
+    # Set guiding
+    ssp_common.start_guiding(outfile)
 
-        #Set guiding
-        self.outfile.write("    GUIDING CONNECT ABORT False\n")
-        self.outfile.write("    GUIDING STOP\n")
-        self.outfile.write("    DELAY 5\n")
-        self.outfile.write("    GUIDING START\n")
-        self.outfile.write("    DELAY 10\n")
-        
-        #Set cooler temperature
-        if int(self.temperature) != 100:
-            self.outfile.write("    COOL DOWN TO " + self.temperature + " RATE 25 TOLERANCE 1\n")
-            
-        #Set exposure
-        self.outfile.write("    SET EXPOSURE TO " + str(self.exposure_time) + "\n")
-        
-        #Set frame capture
-        self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
-        self.outfile.write("        FRAMETYPE Light\n")
-        self.outfile.write("        GUIDING DITHER EVERY " + str(self.dither) + " FRAMES\n")
-        frame_duration = input("Enter number of hours to capture data\n")
-        frame_qty = (float(frame_duration) * 3600) / self.timediv
-        frame_qty = frame_qty - frame_subtraction
-        frame_qty = math.floor(frame_qty)
-            
-        frame_qty_s = str(frame_qty)
-        self.outfile.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
-        self.outfile.write("        GUIDING DITHER EVERY STOP\n")
-        self.outfile.write("    END PRESERVE\n")
-        self.outfile.write("    GUIDING STOP\n")
-        self.outfile.write("    GUIDING DISCONNECT\n\n")
-    
-    def create_rgb_target(self) -> None:
-        frame_subtraction = 0
-        
-        #Setup
-        self.outfile.write("    DELAY 1\n")
-        self.outfile.write("    STILL MODE\n")
+    # Set cooler temperature
+    ssp_common.cool_camera(outfile, Cool, temperature)
 
-        #Configure image formatting
-        self.outfile.write("    SET COLOUR SPACE TO MONO16\n")
-        self.outfile.write("    SET OUTPUT FORMAT TO \"FITS files (*.fits)\"\n")
-        
-        self.preset()
-            
-        self.outfile.write("    MOUNT CONNECT\n")
-        
-        #Configure autofocus
-        self.autofocus()
+    # Set exposure
+    ssp_common.set_exposure(outfile, exposure_time)
 
-        #Configure target
-        if input("Lookup catalog target? (y/n)\n") == 'y':
-            coords_catalog()
-        else:
-            coords_direct()
-        
-        # Image RED
+    # Calculate frames
+    frame_qty = ssp_common.frame_calc(outfile, timediv, frame_subtraction, 3)
 
-        #Set target name
-        if(catalog_used):
-            target_name = catalog_search
-        else:
-            target_name = input("Enter RGB target name\n")
-        
-        self.outfile.write("    TARGETNAME \"" + target_name + "_r\"\n")
-        
-        #Slew and plate solve to a position 3 degrees off of target (Towards north, unless within 85 degrees) to get a rough platesolve
-        dec_d_offset = int(dec_d)
-        if(dec_d_offset > 85):
-            dec_d_offset = dec_d_offset - 3
-        else:
-            dec_d_offset = dec_d_offset + 3
-        self.outfile.write("    WHEEL MOVE TO 1\n")
-        self.outfile.write("    DELAY 10\n")
-        self.outfile.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + str(dec_d_offset) + " " + dec_m + " " + dec_s + "\"\n")
-        self.outfile.write("    DELAY 10\n")
-        self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
-        self.outfile.write("        SET EXPOSURE TO 2\n")
-        self.outfile.write("        SET GAIN TO 100\n")
-        self.outfile.write("        MOUNT SOLVEANDSYNC\n")
-        self.outfile.write("    END PRESERVE\n")
-        self.outfile.write("    DELAY 10\n")
+    # Capture RED
+    ssp_common.write_light_capture(outfile, frame_qty, dither)
 
-        #Platesolve and correct position twice
-        self.outfile.write("    WHEEL MOVE TO 1\n")
-        self.outfile.write("    DELAY 10\n")
-        self.outfile.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + dec_d + " " + dec_m + " " + dec_s + "\"\n")
-        self.outfile.write("    DELAY 10\n")
-        self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
-        self.outfile.write("        SET EXPOSURE TO 2\n")
-        self.outfile.write("        SET GAIN TO 100\n")
-        self.outfile.write("        MOUNT SOLVEANDSYNC\n")
-        self.outfile.write("    END PRESERVE\n")
-        self.outfile.write("    DELAY 10\n")
-        self.outfile.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + dec_d + " " + dec_m + " " + dec_s + "\"\n")
-        self.outfile.write("    DELAY 10\n")
-        self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
-        self.outfile.write("        SET EXPOSURE TO 2\n")
-        self.outfile.write("        SET GAIN TO 100\n")
-        self.outfile.write("        MOUNT SOLVEANDSYNC\n")
-        self.outfile.write("    END PRESERVE\n")
-        self.outfile.write("    DELAY 10\n")
-        
-        #Autofocus
-        if(self.rough_focus != -1):
-            self.outfile.write("    SET EXPOSURE TO 4\n")
-            self.outfile.write("    AUTOFOCUS FROM " + str(self.rough_focus - 100) + " TO " + str(self.rough_focus + 100) + " STEP COUNT 21\n")
-            #Remove 12 minutes from frame time for autofocus
-            frame_subtraction = 1440 / self.exposure_time
-        
-        #Set filter
-        self.outfile.write("    WHEEL MOVE TO " + str(Filters.RED.value) + "\n")
-        self.outfile.write("    DELAY 10\n")
+    # Capture GREEN
+    ssp_common.write_target_name(outfile, target_name, "g")
+    ssp_common.set_filter(outfile, Filters.GREEN.value)
+    ssp_common.write_light_capture(outfile, frame_qty, dither)
 
-        #Set guiding
-        self.outfile.write("    GUIDING CONNECT ABORT False\n")
-        self.outfile.write("    GUIDING STOP\n")
-        self.outfile.write("    DELAY 5\n")
-        self.outfile.write("    GUIDING START\n")
-        self.outfile.write("    DELAY 10\n")
-        
-        #Set cooler temperature
-        if int(self.temperature) != 100:
-            self.outfile.write("    COOL DOWN TO " + self.temperature + " RATE 25 TOLERANCE 1\n")
-            
-        #Set exposure
-        self.outfile.write("    SET EXPOSURE TO " + str(self.exposure_time) + "\n")
-        
-        #Set frame capture
-        self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
-        self.outfile.write("        FRAMETYPE Light\n")
-        self.outfile.write("        GUIDING DITHER EVERY " + str(self.dither) + " FRAMES\n")
-        frame_duration = input("Enter number of hours to capture data\n")
-        frame_qty = (float(frame_duration) * 3600) / self.timediv
-        frame_qty = frame_qty - frame_subtraction
-        frame_qty = frame_qty / 3
-        frame_qty = math.floor(frame_qty)
-            
-        frame_qty_s = str(frame_qty)
-        self.outfile.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
-        self.outfile.write("        GUIDING DITHER EVERY STOP\n")
-        self.outfile.write("    END PRESERVE\n")
-        
-        #Image GREEN
-        self.outfile.write("    TARGETNAME \"" + target_name + "_g\"\n")
-        self.outfile.write("    WHEEL MOVE TO " + str(Filters.GREEN.value) + "\n")
-        self.outfile.write("    DELAY 10\n")
-        self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
-        self.outfile.write("        FRAMETYPE Light\n")
-        self.outfile.write("        GUIDING DITHER EVERY " + str(self.dither) + " FRAMES\n")
-        self.outfile.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
-        self.outfile.write("        GUIDING DITHER EVERY STOP\n")
-        self.outfile.write("    END PRESERVE\n")
-        
-        #Image BLUE
-        self.outfile.write("    TARGETNAME \"" + target_name + "_b\"\n")
-        self.outfile.write("    WHEEL MOVE TO " + str(Filters.BLUE.value) + "\n")
-        self.outfile.write("    DELAY 10\n")
-        self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
-        self.outfile.write("        FRAMETYPE Light\n")
-        self.outfile.write("        GUIDING DITHER EVERY " + str(self.dither) + " FRAMES\n")
-        self.outfile.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
-        self.outfile.write("        GUIDING DITHER EVERY STOP\n")
-        self.outfile.write("    END PRESERVE\n")
-        
-        #Finish target
-        self.outfile.write("    GUIDING STOP\n")
-        self.outfile.write("    GUIDING DISCONNECT\n\n")
-        
-    def shutdown(self) -> None:
-        #Final Shutdown
-        self.outfile.write("    MOUNT PARK\n")
-        if int(self.temperature) != 100:
-            self.outfile.write("    SET COOLER OFF\n")
-        self.outfile.write("    WHEEL MOVE TO 1\n")
-        self.outfile.write("END SEQUENCE\n")
-        self.outfile.close()
+    # Capture BLUE
+    ssp_common.write_target_name(outfile, target_name, "b")
+    ssp_common.set_filter(outfile, Filters.BLUE.value)
+    ssp_common.write_light_capture(outfile, frame_qty, dither)
 
+    # Finish target
+    ssp_common.stop_guiding(outfile)
+
+"""
+FUNCTION: main
+DESCRIPTION: Main function that contols the sequence generation and logical flow.
+INPUTS: None
+OUTPUTS: None
+"""
 def main() -> None:
+    global rgb_flag
+    global outfile
+    global temperature
+    global exposure_time
+    global plate_exposure_time
+    global timediv
+    global dither
+    
+    # CMD line arguments
     if len(sys.argv) != 1:
         print('Formatting error!')
         print('Example: ssp_towa.py')
@@ -515,35 +407,41 @@ def main() -> None:
     filename += ".scs"
     fileout = open(filename, "w+")
 
-    session = Session(fileout, 100, Filters.LUMINANCE, Telescope.CARBON, 0, 0, 0, 0, -1)
+    # Initialize session data
+    init_session(fileout, 100, Filters.LUMINANCE, 0, 0, 0, 0, -1)
 
-    session.start_time()
+    # Set sequence start time
+    ssp_common.start_time(outfile)
     
-    session.set_temp()
+    # Set cooler temperature
+    temperature = ssp_common.set_temp()
     
-    session.set_telescope()
+    # Set filter type
+    set_filter()
     
-    session.set_filter()
+    # Fetch capture parameters
+    exposure_time, plate_exposure_time, timediv, dither = ssp_common.calc_capture_vals(filter_type, Exposure, Plate, Timediv, Dither)
     
-    session.calc_capture_vals()
-    
-    session.unpark()
+    # Unpark mount
+    ssp_common.unpark(outfile)
 
+    # Create normal target or RGB target
     if (rgb_flag == True):
-        session.create_rgb_target()
+        create_rgb_target()
     else:
-        session.create_target()
+        create_target()
 
-    #Insert additional targets
+    #Insert additional targets or RGB targets
     while input("Enter additional target? (y/n)") == 'y':
-        session.set_filter()
-        session.calc_capture_vals()
+        set_filter()
+        exposure_time, plate_exposure_time, timediv, dither = ssp_common.calc_capture_vals(filter_type, Exposure, Plate, Timediv, Dither)
         if (rgb_flag == True):
-            session.create_rgb_target()
+            create_rgb_target()
         else:
-            session.create_target()
+            create_target()
 
-    session.shutdown()
+    # Park mount and end sequence
+    ssp_common.shutdown(outfile, True, temperature)
 
     print("Sequence file generated!\n")
 
