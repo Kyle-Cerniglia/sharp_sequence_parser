@@ -120,3 +120,18 @@ def shutdown(outfile, wheel, temperature) -> None:
 def set_autofocus() -> None:
     rough_focus = int(input("Set autofocuser rough focal point (Set to -1 to disable):\n"))
     return rough_focus
+
+def run_autofocus(outfile, rough_focus, frame_subtraction, exposure_time) -> float:
+    outfile.write("    SET EXPOSURE TO 4\n")
+    outfile.write(
+        "    AUTOFOCUS FROM "
+        + str(rough_focus - 100)
+        + " TO "
+        + str(rough_focus + 100)
+        + " STEP COUNT 21\n"
+    )
+
+    # Remove 12 minutes from frame time for autofocus
+    frame_subtraction = 1440 / exposure_time
+
+    return frame_subtraction

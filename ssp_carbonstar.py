@@ -233,26 +233,6 @@ def centered_plate_solve(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s) -> None:
     outfile.write("    END PRESERVE\n")
     outfile.write("    DELAY 10\n")
 
-def run_autofocus_if_enabled() -> float:
-    global outfile
-
-    frame_subtraction = 0
-
-    if rough_focus != -1:
-        outfile.write("    SET EXPOSURE TO 4\n")
-        outfile.write(
-            "    AUTOFOCUS FROM "
-            + str(rough_focus - 100)
-            + " TO "
-            + str(rough_focus + 100)
-            + " STEP COUNT 21\n"
-        )
-
-        # Remove 12 minutes from frame time for autofocus
-        frame_subtraction = 1440 / exposure_time
-
-    return frame_subtraction
-
 def create_target() -> None:
     global outfile
     global catalog_used
@@ -260,6 +240,7 @@ def create_target() -> None:
     global dither
     global temperature
     global rough_focus
+    global exposure_time
 
     # Setup
     outfile.write("    DELAY 1\n")
@@ -296,7 +277,9 @@ def create_target() -> None:
     centered_plate_solve(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
 
     # Autofocus
-    frame_subtraction = run_autofocus_if_enabled()
+    frame_subtraction = 0
+    if rough_focus != -1:
+        frame_subtraction = ssp_common.run_autofocus(outfile, rough_focus, frame_subtraction, exposure_time)
 
     # Set filter
     outfile.write("    WHEEL MOVE TO " + str(filter_type.value) + "\n")
@@ -328,6 +311,7 @@ def create_rgb_target() -> None:
     global dither
     global temperature
     global rough_focus
+    global exposure_time
 
     # Setup
     outfile.write("    DELAY 1\n")
@@ -365,7 +349,9 @@ def create_rgb_target() -> None:
     centered_plate_solve(ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
 
     # Autofocus
-    frame_subtraction = run_autofocus_if_enabled()
+    frame_subtraction = 0
+    if rough_focus != -1:
+        frame_subtraction = ssp_common.run_autofocus(outfile, rough_focus, frame_subtraction, exposure_time)
 
     # Set RED filter
     outfile.write("    WHEEL MOVE TO " + str(Filters.RED.value) + "\n")
