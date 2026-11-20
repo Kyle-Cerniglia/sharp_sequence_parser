@@ -1,13 +1,17 @@
-# Parser for the sharpcap sequencer
+"""
+FILE: ssp_towa.py
+DESCRIPTION: This file hosts the main function and unique functions for generating sequences for the Towa.
+             Designed for a Minicam8M mounted to a Towa 339
+"""
 
 import sys
 import math
 from enum import Enum
 from enum import auto
+from typing import Optional
+import ssp_common
 
-class Telescope(Enum):
-    TOWA = 2
-    
+# Filters
 class Filters(Enum):
     LUMINANCE = 1
     RED = 2
@@ -18,213 +22,247 @@ class Filters(Enum):
     OIII = 7
     NONE = 8
 
+# Sharpcap preset names
 class Presets(Enum):
     TOWA_RGB = "MC8_RGB"
     TOWA_NB = "MC8_NB"
 
-# Exposure time
-EXPOSURE_TOWA = {
-    Filters.LUMINANCE: 2,
-    Filters.RED: 60,
-    Filters.GREEN: 60,
-    Filters.BLUE: 60,
-    Filters.SII: 180,
-    Filters.HA: 180,
-    Filters.OIII: 180,
-    Filters.NONE: 2
-}
-EXPOSURE = {
-    Telescope.TOWA: EXPOSURE_TOWA
-}
+# Exposure durations for each filter (s)
+class Exposure(Enum):
+    LUMINANCE = 2
+    RED = 60
+    GREEN = 60
+    BLUE = 60
+    SII = 180
+    HA = 180
+    OIII = 180
+    NONE = 2
 
-# Platesolving exposure time
-PLATE_EXPOSURE_TOWA = {
-    Filters.LUMINANCE: 2,
-    Filters.RED: 2,
-    Filters.GREEN: 2,
-    Filters.BLUE: 2,
-    Filters.SII: 2,
-    Filters.HA: 2,
-    Filters.OIII: 2,
-    Filters.NONE: 2
-}
-PLATE_EXPOSURE = {
-    Telescope.TOWA: PLATE_EXPOSURE_TOWA
-}
+# Platesolving durations for each filter (s)
+class Plate(Enum):
+    LUMINANCE = 2
+    RED = 2
+    GREEN = 2
+    BLUE = 2
+    SII = 2
+    HA = 2
+    OIII = 2
+    NONE = 2
 
-# Time divider for frame calculation
-TIMEDIV_TOWA = {
-    Filters.LUMINANCE: 70.16,
-    Filters.RED: 70.16,
-    Filters.GREEN: 70.16,
-    Filters.BLUE: 70.16,
-    Filters.SII: 190.82,
-    Filters.HA: 190.82,
-    Filters.OIII: 190.82,
-    Filters.NONE: 70.16
-}
-TIMEDIV = {
-    Telescope.TOWA: TIMEDIV_TOWA
-}
+# Time divider for each filter (Adust this value to get actual sequence duration to match the intended sequence duration)
+class Timediv(Enum):
+    LUMINANCE = 70.16
+    RED = 70.16
+    GREEN = 70.16
+    BLUE = 70.16
+    SII = 190.82
+    HA = 190.82
+    OIII = 190.82
+    NONE = 70.16
 
-# Frames per dither
-DITHER_TOWA = {
-    Filters.LUMINANCE: 10,
-    Filters.RED: 10,
-    Filters.GREEN: 10,
-    Filters.BLUE: 10,
-    Filters.SII: 3,
-    Filters.HA: 3,
-    Filters.OIII: 3,
-    Filters.NONE: 10
-}
-DITHER = {
-    Telescope.TOWA: DITHER_TOWA
-}
+# Dither frequency for each filter (Frames per dither event)
+class Dither(Enum):
+    LUMINANCE = 10
+    RED = 10
+    GREEN = 10
+    BLUE = 10
+    SII = 3
+    HA = 3
+    OIII = 3
+    NONE = 10
 
-class Session:
-    def __init__(
-        self, outfile, temperature, filter_type, telescope_type, exposure_time, timediv, dither, plate_exposure_time
-    ):
-        self.outfile = outfile
-        self.temperature = temperature
-        self.filter_type = filter_type
-        self.telescope_type = telescope_type
-        self.exposure_time = exposure_time
-        self.timediv = timediv
-        self.dither = dither
-        self.plate_exposure_time = plate_exposure_time
+# Cooler parameters
+class Cool(Enum):
+    RATE = 25
+    TOLERANCE = 1
+
+# Local function variables
+outfile = None
+temperature = None
+filter_type = None
+exposure_time = None
+timediv = None
+dither = None
+plate_exposure_time = None
+
+"""
+FUNCTION: init_session
+DESCRIPTION: Data initializer
+INPUTS:
+out_file: Output file
+temp: Cooler temperature (C)
+filter_val: Filter selection
+exposure_val: Exposure duration (s)
+timediv_val: Time divider
+dither_val: Dither frequency (Frames per dither)
+plate_exposure_time: Platesolving exposure duration (s)
+OUTPUTS: None
+"""
+def init_session(
+    out_file,
+    temp=None,
+    filter_val=None,
+    exposure_val=None,
+    timediv_val=None,
+    dither_val=None,
+    plate_exposure_val=None,
+) -> None:
+    """
+    Replaces Session.__init__().
+    Stores the session data in globals instead of self fields.
+    """
+
+    global outfile
+    global temperature
+    global filter_type
+    global exposure_time
+    global timediv
+    global dither
+    global plate_exposure_time
+
+    outfile = out_file
+    temperature = temp
+    filter_type = filter_val
+    exposure_time = exposure_val
+    timediv = timediv_val
+    dither = dither_val
+    plate_exposure_time = plate_exposure_val
+
+"""
+FUNCTION: set_filter
+DESCRIPTION: User selects the filter for the session.
+INPUTS: None
+OUTPUTS: None
+"""
+def set_filter() -> None:
+    global filter_type
+
+    filter_in = input(
+        "Select your filter:\n"
+        "[1] = Luminance\n"
+        "[2] = Red\n"
+        "[3] = Green\n"
+        "[4] = Blue\n"
+        "[5] = SII\n"
+        "[6] = Ha\n"
+        "[7] = OIII\n"
+        "[8] = None\n"
+    )
+    filter_type = Filters(int(filter_in))
+
+"""
+FUNCTION: preset
+DESCRIPTION: Selects the sharpcap preset depending on what kind of filter was selected (BB vs NB).
+INPUTS: None
+OUTPUTS: None
+"""
+def preset() -> None:
+    global outfile
+    global filter_type
+
+    if filter_type in [Filters.RED, Filters.GREEN, Filters.BLUE]:
+        preset_val = Presets.TOWA_RGB
+    else:
+        preset_val = Presets.TOWA_NB
+    outfile.write(f"    LOAD PROFILE {preset_val.value}\n")
+
+"""
+FUNCTION: identify_target_name
+DESCRIPTION: Identifies the target name based on the target and the active filter.
+INPUTS:
+target_name: Target name
+OUTPUTS: None
+"""
+def identify_target_name(target_name: str) -> None:
+    global outfile
+    global filter_type
+
+    if filter_type == Filters.LUMINANCE:
+        ssp_common.write_target_name(outfile, target_name, "l")
+    elif filter_type == Filters.RED:
+        ssp_common.write_target_name(outfile, target_name, "r")
+    elif filter_type == Filters.GREEN:
+        ssp_common.write_target_name(outfile, target_name, "g")
+    elif filter_type == Filters.BLUE:
+        ssp_common.write_target_name(outfile, target_name, "b")
+    elif filter_type == Filters.SII:
+        ssp_common.write_target_name(outfile, target_name, "s")
+    elif filter_type == Filters.HA:
+        ssp_common.write_target_name(outfile, target_name, "h")
+    elif filter_type == Filters.OIII:
+        ssp_common.write_target_name(outfile, target_name, "o")
+    else:
+        ssp_common.write_target_name(outfile, target_name, "")
+
+"""
+FUNCTION: create_target
+DESCRIPTION: Create an imaging target sequence (Unique to this telescope setup, incorporating common and local functions).
+INPUTS: None
+OUTPUTS: None
+"""
+def create_target() -> None:
+    global outfile
+    global dither
+    global temperature
+
+    # Configure image formatting
+    ssp_common.set_format(outfile, True)
     
-    def start_time(self) -> None:
-        #Set start time
-        self.outfile.write("SEQUENCE\n")
+    # Configure sharpcap preset
+    preset()
     
-        if input("Set a start time? (y/n)\n") == 'y':
-            hour = input("Enter hour start (24h)\n")
-            minute = input("Enter minute start\n")
-            if int(minute) < 10:
-                minute = "0" + minute
-            if int(hour) < 12:
-                self.outfile.write("    WAIT UNTIL LOCALTIME \"" + hour + ":" + minute + " AM\"\n")
-            else:
-                hour = str(int(hour) - 12);
-                self.outfile.write("    WAIT UNTIL LOCALTIME \"" + hour + ":" + minute + " PM\"\n")
-                
-    def unpark(self) -> None:
-        self.outfile.write("    DELAY 1\n")
-        self.outfile.write("    MOUNT UNPARK\n")
-        self.outfile.write("    MOUNT UNPARK\n")
+    # Connect to mount
+    ssp_common.connect_mount(outfile)
+
+    # Configure target coordinates
+    ra_h, ra_m, ra_s, dec_d, dec_m, dec_s, catalog_used = ssp_common.coords_direct()
+
+    # Set target name
+    target_name = input("Enter target name\n")
     
-    def set_temp(self) -> None:
-        #Set cooler temperature
-        self.temperature = input("Set cooler temp C (100 to disable)\n")
-        
-    def set_telescope(self) -> None:
-        self.telescope_type = Telescope(2)
-        
-    def set_filter(self) -> None:
-        filter_in = input("Select your filter:\n[1] = Luminance\n[2] = Red\n[3] = Green\n[4] = Blue\n[5] = SII\n[6] = Ha\n[7] = OIII\n[8] = None\n")
-        self.filter_type = Filters(int(filter_in))
+    identify_target_name(target_name)
+
+    # Slew and plate solve to a position 3 degrees off target
+    ssp_common.goto_plate_solve(outfile, 3, 2, True, ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
+
+    # Platesolve and correct position twice
+    ssp_common.goto_plate_solve(outfile, 0, 2, True, ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
+    ssp_common.goto_plate_solve(outfile, 0, 2, True, ra_h, ra_m, ra_s, dec_d, dec_m, dec_s)
+
+    # Set filter
+    ssp_common.set_filter(outfile, filter_type.value)
+
+    # Set guiding
+    ssp_common.start_guiding(outfile)
+
+    # Set cooler temperature
+    ssp_common.cool_camera(outfile, Cool, temperature)
+
+    # Set exposure
+    ssp_common.set_exposure(outfile, exposure_time)
+
+    # Set frame capture
+    frame_qty = ssp_common.frame_calc(outfile, timediv, frame_subtraction, 1)
+    ssp_common.write_light_capture(outfile, frame_qty, dither)
     
-    def calc_capture_vals(self) -> None:
-        self.exposure_time = EXPOSURE[self.telescope_type][self.filter_type]
-        self.plate_exposure_time = PLATE_EXPOSURE[self.telescope_type][self.filter_type]
-        self.timediv = TIMEDIV[self.telescope_type][self.filter_type]
-        self.dither = DITHER[self.telescope_type][self.filter_type]
-        
-    def preset(self) -> None:
-        if self.filter_type in [Filters.RED, Filters.GREEN, Filters.BLUE]:
-            preset_val = Presets.TOWA_RGB
-        else:
-            preset_val = Presets.TOWA_NB
-        self.outfile.write(f"    LOAD PROFILE {preset_val.value}\n")
+    # Finish target
+    ssp_common.stop_guiding(outfile)
 
-    def create_target(self) -> None:
-        #Setup
-        self.outfile.write("    DELAY 1\n")
-        self.outfile.write("    STILL MODE\n")
-
-        #Configure image formatting
-        self.outfile.write("    SET COLOUR SPACE TO MONO16\n")
-        self.outfile.write("    SET OUTPUT FORMAT TO \"FITS files (*.fits)\"\n")
-        
-        self.preset()
-            
-        self.outfile.write("    MOUNT CONNECT\n")
-
-        #Configure target
-        ra_h = input("Enter J2000 coordinates (RA h)\n")
-        ra_m = input("Enter J2000 coordinates (RA m)\n")
-        ra_s = input("Enter J2000 coordinates (RA s)\n")
-        dec_d = input("Enter J2000 coordinates (DEC d)\n")
-        dec_m = input("Enter J2000 coordinates (DEC m)\n")
-        dec_s = input("Enter J2000 coordinates (DEC s)\n")
-        self.outfile.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + dec_d + " " + dec_m + " " + dec_s + "\"\n")
-        self.outfile.write("    DELAY 20\n")
-
-        #Set target name
-        target_name = input("Enter target name\n")
-        self.outfile.write("    TARGETNAME \"" + target_name + "\"\n")
-
-        #Platesolve and correct position twice
-        self.outfile.write("    WHEEL MOVE TO 1\n")
-        self.outfile.write("    DELAY 20\n")
-        self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
-        self.outfile.write("        SET EXPOSURE TO 2\n")
-        self.outfile.write("        SET GAIN TO 100\n")
-        self.outfile.write("        MOUNT SOLVEANDSYNC\n")
-        self.outfile.write("    END PRESERVE\n")
-        self.outfile.write("    DELAY 10\n")
-        self.outfile.write("    MOUNT GOTO \"" + ra_h + " " + ra_m + " " + ra_s + ", " + dec_d + " " + dec_m + " " + dec_s + "\"\n")
-        self.outfile.write("    DELAY 20\n")
-        self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
-        self.outfile.write("        SET EXPOSURE TO 2\n")
-        self.outfile.write("        SET GAIN TO 100\n")
-        self.outfile.write("        MOUNT SOLVEANDSYNC\n")
-        self.outfile.write("    END PRESERVE\n")
-        self.outfile.write("    DELAY 10\n")
-        self.outfile.write("    WHEEL MOVE TO " + str(self.filter_type.value) + "\n")
-        self.outfile.write("    DELAY 20\n")
-
-        #Set guiding
-        self.outfile.write("    GUIDING CONNECT ABORT False\n")
-        self.outfile.write("    GUIDING STOP\n")
-        self.outfile.write("    DELAY 5\n")
-        self.outfile.write("    GUIDING START\n")
-        self.outfile.write("    DELAY 20\n")
-        
-        #Set cooler temperature
-        if int(self.temperature) != 100:
-            self.outfile.write("    COOL DOWN TO " + self.temperature + " RATE 25 TOLERANCE 1\n")
-        
-        #Set exposure
-        self.outfile.write("    SET EXPOSURE TO " + str(self.exposure_time) + "\n")
-        
-        #Set frame capture
-        self.outfile.write("    PRESERVE CAMERA SETTINGS\n")
-        self.outfile.write("        FRAMETYPE Light\n")
-        self.outfile.write("        GUIDING DITHER EVERY " + str(self.dither) + " FRAMES\n")
-        frame_duration = input("Enter number of hours to capture data\n")
-        frame_qty = (float(frame_duration) * 3600) / self.timediv
-        frame_qty = math.floor(frame_qty)
-            
-        frame_qty_s = str(frame_qty)
-        self.outfile.write("        CAPTURE " + frame_qty_s + " FRAMES REQUIREGUIDING True\n")
-        self.outfile.write("        GUIDING DITHER EVERY STOP\n")
-        self.outfile.write("    END PRESERVE\n")
-        self.outfile.write("    GUIDING STOP\n")
-        self.outfile.write("    GUIDING DISCONNECT\n\n")
-        
-    def shutdown(self) -> None:
-        #Final Shutdown
-        self.outfile.write("    MOUNT PARK\n")
-        if int(self.temperature) != 100:
-            self.outfile.write("    SET COOLER OFF\n")
-        self.outfile.write("    WHEEL MOVE TO 1\n")
-        self.outfile.write("END SEQUENCE\n")
-        self.outfile.close()
-
+"""
+FUNCTION: main
+DESCRIPTION: Main function that contols the sequence generation and logical flow.
+INPUTS: None
+OUTPUTS: None
+"""
 def main() -> None:
+    global outfile
+    global temperature
+    global exposure_time
+    global plate_exposure_time
+    global timediv
+    global dither
+    
+    # CMD line arguments
     if len(sys.argv) != 1:
         print('Formatting error!')
         print('Example: ssp_towa.py')
@@ -236,30 +274,36 @@ def main() -> None:
     filename += ".scs"
     fileout = open(filename, "w+")
 
-    session = Session(fileout, 100, Filters.LUMINANCE, Telescope.TOWA, 0, 0, 0, 0)
+    # Initialize session data
+    init_session(fileout, 100, Filters.LUMINANCE, 0, 0, 0, 0)
 
-    session.start_time()
+    # Set sequence start time
+    ssp_common.start_time(outfile)
     
-    session.set_temp()
+    # Set cooler temperature
+    temperature = ssp_common.set_temp()
     
-    session.set_telescope()
+    # Set filter type
+    set_filter()
     
-    session.set_filter()
+    # Fetch capture parameters
+    exposure_time, plate_exposure_time, timediv, dither = ssp_common.calc_capture_vals(filter_type, Exposure, Plate, Timediv, Dither)
     
-    session.calc_capture_vals()
-    
-    session.unpark()
+    # Unpark mount
+    ssp_common.unpark(outfile)
 
-    session.create_target()
+    # Create target
+    create_target()
 
     #Insert additional targets
     while input("Enter additional target? (y/n)") == 'y':
-        session.set_filter()
-        session.calc_capture_vals()
-        session.create_target()
+        set_filter()
+        exposure_time, plate_exposure_time, timediv, dither = ssp_common.calc_capture_vals(filter_type, Exposure, Plate, Timediv, Dither)
+        create_target()
 
-    session.shutdown()
+    ssp_common.shutdown(outfile, True, temperature)
 
+    # Park mount and end sequence
     print("Sequence file generated!\n")
 
 if __name__ == "__main__":
