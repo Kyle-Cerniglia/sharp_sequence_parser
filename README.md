@@ -16,7 +16,7 @@ After installing Python 3.11.3 (Newer versions will >probably< work), you can ei
 
 WHAT ARE THESE FILES?
 
-Each top level python file (Excluding ssp_common.py) is a particular copy of the software, configured for a specific telescope setup:
+Each top level python file (Excluding ssp_common.py) is configured for a specific telescope setup:
 
 
 ssp_c6h.py:
@@ -79,14 +79,19 @@ For this example, I will walk through the use of ssp_carbonstar.py as this is th
 
 4: Filter: Based on the list of filters within the python file, you can select which filter you want to use by entering the number indicated next to the filter name (This is the QHY monochrome filter wheel containing LRGBSHO and an 8th empty slot). In this example, there is an option for '9', which will split your imaging time equally across the RGB filters (Red block first, then the green block, then the blue block).
 
-5: Autofocuser: If you do not need the system to autofocus, enter '-1'. If you would like the system to perform an autofocus, then enter the known approximate focus point in steps. The scope will scan -100 to +100 steps fromt he reference point split into 21 steps.
+5: Autofocuser: If you do not need the system to autofocus, enter '-1'. If you would like the system to perform an autofocus, then enter the known approximate focus point in steps. The scope will scan -100 to +100 steps from the reference point split into 21 steps.
 
-6: Catalog: If you wish to manually enter in the coordinates of a target, skip this request for a catalog lookup by pressing 'n'. If you would like to use a catalog, press 'y'. You will be given a list of loaded catalogs and how to format the designation (For example, if you want to select Messier 42, you would enter 'm42'. If you wanted Sharples-2 220, you would enter 'sh2-220' as indicated). If the object is not present in the catalog, it will skip the catalog lookup.
+6: Catalog: If you wish to manually enter in the coordinates of a target, skip this request for a catalog lookup by pressing 'n'. If you would like to use a catalog, press 'y'. You will be given a list of loaded catalogs and how to format the designation (For example, if you want to select Messier 42, you would enter 'm42'. If you wanted Sharpless-2 220, you would enter 'sh2-220' as indicated). If the object is not present in the catalog, it will skip the catalog lookup.
 
 7: Manual Coordinates: If the catalog function was not used (Or the desired object was not found in the catalog), you will be prompted to enter in the coordinates of the target manually. All coordinates are in J2000 format, and it will prompt you for each part of the coordinates individually (First RA Hours, then RA Minutes, etc).
 
-8: Name: Enter in your desired target name for the output files. A suffix will be appended to this name to indicate the filter used (Ex: m42_b is Messier 42 with the Blue filter).
+8: Name: Enter in your desired target name for the output files. A suffix will be automatically appended to this name to indicate the filter used (Ex: m42_b is Messier 42 with the Blue filter).
 
 9: Duration: Enter in the duration for the image capture in hours (WARNING: This software does not currently handle meridian flips automatically! If this is needed, manually enter in a second imaging session on the same target).
 
-10: Next Target: If you are done entering in sequence data, press 'n'. If you need to enter another target that will image after the prior target, press 'p' and the software will repeat the prior prompts for the new target. When complete, your sequencer file will appear in the folder.
+10: Next Target: If you are done entering in sequence data, press 'n'. If you need to enter another target that will image after the prior target, press 'y' and the software will repeat the prior prompts for the new target. When complete, your sequencer file will appear in the folder.
+
+
+KNOWN BUGS
+
+- Sometimes the sequence fails to unpark my mount when it starts, so I usually unpark it manually through EQMOD when loading the sequence.
